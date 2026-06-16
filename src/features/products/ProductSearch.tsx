@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Product } from "../../shared/types/product";
 import { useProductSearch } from "../../shared/hooks/queries/useProductsSearch";
 import { useDebounce } from "use-debounce";
+import { useCategories } from "../../shared/hooks/queries/useCategories";
 
 interface FilterState {
   search: string;
