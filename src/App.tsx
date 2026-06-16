@@ -10,6 +10,7 @@ import ProductsList from "./features/products/ProductsList";
 import ScanProduct from "./features/scanner/ScanProduct";
 import ProductDetail from "./features/products/ProductDetail";
 import Settings from "./features/settings/Settings";
+import Auth from "./features/auth";
 
 const Loading = lazy(() => import("./components/common/Loading"));
 
@@ -44,6 +45,7 @@ function App() {
             {/* <CompleteFramerMotionDemo/> */}
             <Loading />
             <Routes>
+              <Route path="/auth/" element={<Auth />} />
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsList />} />
               <Route path="/scan" element={<ScanProduct />} />

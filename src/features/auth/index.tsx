@@ -1,138 +1,365 @@
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
-import { Otp } from "./Otp";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import apiClient, { api } from "../../api/axois";
 import { toast } from "sonner";
-import { useLocation, useNavigate } from "react-router";
-import Logo from "../../components/common/Logo";
+import { apiClient } from "../../api/client";
 
-const Auth = () => {
-  const [isOtp, setIsOtp] = useState(false);
-  const [number, setNumber] = useState<string>("");
-  const [timer, setTimer] = useState(0);
-
-  const formButton = useRef(null);
+const Auth: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
 
-  useEffect(() => {
-    (() => {
-      if (location.hash !== "#verify-code") {
-        setIsOtp(false);
-      }
-    })();
-  }, [location.hash]);
-  useEffect(() => {
-    if (isOtp) navigate("#verify-code");
-    else navigate("");
-  }, [navigate, isOtp]);
-  const submit = async (e: SubmitEvent<HTMLFormElement>) => {
-    if (e) e.preventDefault();
-    const formData = new FormData(e.target);
-    if (!isOtp) {
-      try {
-        const response = await apiClient.post(api.auth.main, { number });
-        if (!response.data) throw new Error("");
-        if (response.data.error === "haveCode") {
-          toast.success(
-            "کد یکبار مصرف ارسال شده است ! از کد یکبار مصرف قبلی استفاده کنید.",
-          );
-          setTimer(response.data.time);
-          return setIsOtp(true);
-        }
+  const [loginData, setLoginData] = useState({
+    username: "",
+    password: "",
+  });
 
-        toast.success("کد یکبار مصرف ارسال شد.");
-        setTimer(response.data.time);
-        setNumber(number);
+  const [registerData, setRegisterData] = useState({
+    username: "",
+    first_name: "",
+    last_name: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-        return setIsOtp(true);
-      } catch {
-        /* empty */
-      }
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!loginData.username || !loginData.password) {
+      toast.error("لطفاً همه فیلدها را پر کنید");
       return;
     }
 
-    const code_otp = Array(5)
-      .fill("")
-      .map((item, i) => {
-        item = String(formData.get("otp_" + (i + 1)) || ",");
-        return item;
-      })
-      .join("");
+    setIsLoading(true);
     try {
-      const response = await apiClient.post(api.auth.verifyCode, {
-        number,
-        code: code_otp,
+      const response = await apiClient.post("/auth/login", {
+        username: loginData.username,
+        password: loginData.password,
       });
-      const { token } = response.data as { token: string };
+
+      const { token, user } = response.data;
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      toast.success("خوش آمدید.");
-      navigate("/app");
-    } catch (e) {
-      console.error(e);
-
-      // if (isAxiosError(e)) {
-      //   console.log(e.response.data.error);
-
-      //   if (e.response.data.error !== "Code incorrect") setIsOtp(false);
-      // }
+      toast.success(`خوش آمدید ${user.username} 👋`);
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "خطا در ورود");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !registerData.username ||
+      !registerData.first_name ||
+      !registerData.last_name ||
+      !registerData.password
+    ) {
+      toast.error("لطفاً همه فیلدها را پر کنید");
+      return;
+    }
+
+    if (registerData.password !== registerData.confirmPassword) {
+      toast.error("رمز عبور و تکرار آن مطابقت ندارند");
+      return;
+    }
+
+    if (registerData.password.length < 5) {
+      toast.error("رمز عبور باید حداقل 5 کاراکتر باشد");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await apiClient.post("/auth/register", {
+        username: registerData.username,
+        first_name: registerData.first_name,
+        last_name: registerData.last_name,
+        password: registerData.password,
+      });
+
+      toast.success("حساب کاربری با موفقیت ایجاد شد ✅");
+      setIsRegister(false);
+      setLoginData({
+        username: registerData.username,
+        password: "",
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "خطا در ثبت‌نام");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleMode = () => {
+    setIsRegister(!isRegister);
+    setLoginData({ username: "", password: "" });
+    setRegisterData({
+      username: "",
+      first_name: "",
+      last_name: "",
+      password: "",
+      confirmPassword: "",
+    });
+  };
+
   return (
-    <div className="min-h-screen flex justify-center ">
-      <form
-        onSubmit={submit}
-        className="pb-5 bgBox shadow rounded-2xl border border-(--foreground-l) p-3 space-y-6 my-auto max-w-125 w-[90%] "
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
       >
-        <div className="space-y-4">
-          <div className="max-w-32 mx-auto">
-            <Logo />
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-gray-100/50 dark:border-gray-700/50">
+          <div className="flex justify-center mb-6">
+            <div className="max-w-55 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <img src="/assets/images/logo/inline-logo.webp" className="" />
+            </div>
           </div>
-          <h1 className="text-2xl text-(--primery)">ورود به حساب</h1>
-          <p className="border-r-4 pr-4 border-(--primery) text-(--foregorund)">
-            به کلینیک هوشمند خوش آمدید
-          </p>
-        </div>
-        <div className="overflow-hidden">
-          {!isOtp && (
-            <motion.label
-              transition={{ delay: 0.1 }}
-              initial={{ opacity: 0.0 }}
+
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              {isRegister ? "ایجاد حساب کاربری" : "خوش آمدید"}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {isRegister
+                ? "برای استفاده از ستاک اسکن ثبت‌نام کنید"
+                : "برای ورود به ستاک اسکن اطلاعات خود را وارد کنید"}
+            </p>
+          </div>
+
+          {!isRegister && (
+            <motion.form
+              key="login"
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`flex flex-col gap-2`}
+              exit={{ opacity: 0 }}
+              onSubmit={handleLogin}
+              className="space-y-5"
             >
-              <span>شماره تلفن</span>
-              <input
-                required
-                value={number}
-                onChange={(e) => setNumber(e.target.value)}
-                type="tel"
-                pattern="09[0-9]{9}"
-                placeholder="09*********"
-                title="شماره موبایل باید با 09 شروع شده و 11 رقم باشد"
-              />
-            </motion.label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  نام کاربری
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-user"></i>
+                  </span>
+                  <input
+                    type="text"
+                    value={loginData.username}
+                    autoComplete="username"
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, username: e.target.value })
+                    }
+                    placeholder="نام کاربری خود را وارد کنید"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  رمز عبور
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-lock"></i>
+                  </span>
+                  <input
+                    type="password"
+                    value={loginData.password}
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, password: e.target.value })
+                    }
+                    autoComplete="current-password"
+                    placeholder="رمز عبور خود را وارد کنید"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+                <div className="flex justify-end mt-1">
+                  <button
+                    type="button"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    رمز عبور را فراموش کرده‌اید؟
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    در حال ورود...
+                  </span>
+                ) : (
+                  "ورود"
+                )}
+              </button>
+            </motion.form>
           )}
-          {isOtp && (
-            <Otp
-              timer={timer}
-              formButton={formButton}
-              isShow={isOtp}
-              setIsShow={setIsOtp}
-              number={number}
-            />
+
+          {isRegister && (
+            <motion.form
+              key="register"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onSubmit={handleRegister}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  نام
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-user-circle"></i>
+                  </span>
+                  <input
+                    type="text"
+                    value={registerData.first_name}
+                    onChange={(e) =>
+                      setRegisterData({
+                        ...registerData,
+                        first_name: e.target.value,
+                      })
+                    }
+                    placeholder="حسین"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+              </div>{" "}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  نام خانوادگی
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-user-circle"></i>
+                  </span>
+                  <input
+                    type="text"
+                    value={registerData.last_name}
+                    onChange={(e) =>
+                      setRegisterData({
+                        ...registerData,
+                        last_name: e.target.value,
+                      })
+                    }
+                    placeholder="دریس"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  نام کاربری
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-user"></i>
+                  </span>
+                  <input
+                    type="text"
+                    value={registerData.username}
+                    onChange={(e) =>
+                      setRegisterData({
+                        ...registerData,
+                        username: e.target.value,
+                      })
+                    }
+                    placeholder="نام کاربری (فقط حروف و اعداد)"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  رمز عبور
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-lock"></i>
+                  </span>
+                  <input
+                    type="password"
+                    value={registerData.password}
+                    onChange={(e) =>
+                      setRegisterData({
+                        ...registerData,
+                        password: e.target.value,
+                      })
+                    }
+                    placeholder="حداقل 5 کاراکتر"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  تکرار رمز عبور
+                </label>
+                <div className="pr-2 relative flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl transition-all duration-200 focus-within:border-primary">
+                  <span className=" text-gray-400">
+                    <i className="fas fa-check-circle"></i>
+                  </span>
+                  <input
+                    type="password"
+                    value={registerData.confirmPassword}
+                    onChange={(e) =>
+                      setRegisterData({
+                        ...registerData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    placeholder="رمز عبور را دوباره وارد کنید"
+                    className="w-full pr-10 pl-4 py-2! rounded-xl transition-all duration-200 border-0! "
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    در حال ثبت‌نام...
+                  </span>
+                ) : (
+                  "ثبت‌نام"
+                )}
+              </button>
+            </motion.form>
           )}
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {isRegister ? "قبلاً ثبت‌نام کرده‌اید؟" : "حساب کاربری ندارید؟"}
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="mr-2 text-blue-600 dark:text-blue-400 font-medium hover:underline"
+              >
+                {isRegister ? "وارد شوید" : "ثبت‌نام کنید"}
+              </button>
+            </p>
+          </div>
         </div>
-        <button
-          ref={formButton}
-          type="submit"
-          className="primery font-bold w-full "
-        >
-          {!isOtp && "اراسل کد یکبار مصرف"}
-          {isOtp && "ورود"}
-        </button>
-      </form>
+      </motion.div>
     </div>
   );
 };

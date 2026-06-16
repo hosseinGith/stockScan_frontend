@@ -77,7 +77,6 @@ body {
 body {
   background-color: var(--bg-body);
   color: var(--text-primary);
-  font-family: system-ui, "Segoe UI", "IranSans", sans-serif;
 }
 
 .bg-surface {
@@ -94,4 +93,60 @@ body {
 }
 .border-default {
   border-color: var(--border);
+}
+
+input,
+select,
+textarea,
+button {
+  @apply outline-0;
+}
+input {
+  direction: auto;
+  @apply border-2 border-(--foreground-l) outline-0 transition-all  rounded-xl py-1 px-2;
+}
+input[type="number"] {
+  direction: ltr;
+}
+input:focus {
+  @apply border-primary;
+}
+.button,
+button {
+  @apply rounded-full cursor-pointer hover:opacity-85 transition p-2;
+}
+
+.button.primary,
+button.primary {
+  @apply bg-primary text-text-primary;
+}
+section {
+  @apply container px-6 mx-auto;
+}
+main:not(.def_st) {
+  @apply mt-12;
+}
+main:not(.def_st) section {
+  @apply space-y-6;
+}
+
+main:not(.def_st) {
+  @apply space-y-6;
+}
+header:not(.def_st) {
+  @apply p-4 bg-(--background) shadow;
+}
+
+.window {
+  @apply z-100 opacity-0 pointer-events-none transition-all fixed left-0 top-0 bg-[#000000c4] h-full w-full;
+}
+
+.window.active {
+  @apply opacity-100 pointer-events-auto;
+}
+.boderWithHoverBtn {
+  @apply border-2 border-primary hover:bg-(--primary-vl);
+}
+.bgBox {
+  @apply bg-(--background) shadow;
 }

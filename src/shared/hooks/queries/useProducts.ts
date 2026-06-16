@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { productsApi } from "../../api/endpoints/products.api";
-import type { CreateProductDto, UpdateProductDto } from "../types/product";
-import { showToast } from "../stores/slices/uiSlice";
-import { useAppDispatch } from "../stores/hooks";
+import { productsApi } from "../../../api/endpoints/products.api";
+import type { CreateProductDto, UpdateProductDto } from "../../types/product";
+import { showToast } from "../../stores/slices/uiSlice";
+import { useAppDispatch } from "../../stores/hooks";
 
 export const productKeys = {
   all: ["products"] as const,

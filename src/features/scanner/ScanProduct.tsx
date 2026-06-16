@@ -4,11 +4,11 @@ import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
 import { addProduct } from "../../shared/stores/slices/productSlice";
 import { showToast } from "../../shared/stores/slices/uiSlice";
 import { generateId } from "../../shared/utils/helpers";
-import type { Product } from "../../shared/types/index";
+import type { Product } from "../../shared/types/product";
 import BottomNav from "../../shared/components/BottomNav";
 
 // کتابخانه اسکنر
-import { Html5Qrcode } from "html5-qrcode";
+// import { Html5Qrcode } from "html5-qrcode";
 
 const ScanProduct: React.FC = () => {
   const navigate = useNavigate();

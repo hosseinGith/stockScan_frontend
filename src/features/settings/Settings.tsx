@@ -310,7 +310,7 @@ const Settings: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 text-sm">نام برنامه:</span>
                 <span className="font-medium text-gray-800 dark:text-white">
-                  انبارک
+                  ستاک اسکن
                 </span>
               </div>
               <div className="flex justify-between items-center">
