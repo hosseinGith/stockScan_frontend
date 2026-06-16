@@ -3,6 +3,9 @@ import type {
   Product,
   CreateProductDto,
   UpdateProductDto,
+  ProductFilters,
+  ApiResponse,
+  PaginatedResponse,
 } from "../../shared/types/product";
 
 export const productsApi = {
@@ -27,4 +30,8 @@ export const productsApi = {
   // PATCH /products/:id/quantity
   updateQuantity: (id: string, quantity: number, action: "add" | "subtract") =>
     apiClient.patch<Product>(`/products/${id}/quantity`, { quantity, action }),
+  search: (params: ProductFilters) =>
+    apiClient.get<ApiResponse<PaginatedResponse<Product>>>("/products/search", {
+      params,
+    }),
 };
