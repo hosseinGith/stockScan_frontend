@@ -1,0 +1,30 @@
+import { apiClient } from "../client";
+import type {
+  Product,
+  CreateProductDto,
+  UpdateProductDto,
+} from "../../shared/types/product";
+
+export const productsApi = {
+  // GET /products
+  getAll: (params?: { search?: string; category?: string }) =>
+    apiClient.get<Product[]>("/products", { params }),
+
+  // GET /products/:id
+  getById: (id: string) => apiClient.get<Product>(`/products/${id}`),
+
+  // POST /products
+  create: (data: CreateProductDto) =>
+    apiClient.post<Product>("/products", data),
+
+  // PATCH /products/:id
+  update: (id: string, data: UpdateProductDto) =>
+    apiClient.patch<Product>(`/products/${id}`, data),
+
+  // DELETE /products/:id
+  delete: (id: string) => apiClient.delete(`/products/${id}`),
+
+  // PATCH /products/:id/quantity
+  updateQuantity: (id: string, quantity: number, action: "add" | "subtract") =>
+    apiClient.patch<Product>(`/products/${id}/quantity`, { quantity, action }),
+};
