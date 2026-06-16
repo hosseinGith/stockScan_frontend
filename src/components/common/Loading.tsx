@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
-import { useAppSelector } from "../../stores/hooks";
+import { useAppSelector } from "../../shared/stores/hooks";
 const Loading = () => {
   const { isLoading } = useAppSelector((state) => state.ui);
 

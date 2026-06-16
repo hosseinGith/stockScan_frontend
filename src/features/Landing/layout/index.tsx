@@ -3,7 +3,7 @@ import ChangeTheme from "../../../components/common/ChangeTheme";
 import Logo from "../../../components/common/Logo";
 import Footer from "../../../components/layout/Footer";
 import apiClient, { api } from "../../../api/axois";
-import { useAppSelector } from "../../../stores/hooks";
+import { useAppSelector } from "../../../shared/stores/hooks";
 import type { ReactNode } from "react";
 
 const Layout = ({ children }: { children: ReactNode }) => {

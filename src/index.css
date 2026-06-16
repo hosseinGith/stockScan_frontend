@@ -1,40 +1,40 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  --bg-body: #f3f4f6;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-hover: #f9fafb;
+@theme {
+  --color-bg-body: #f3f4f6;
+  --color-bg-surface: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f9fafb;
 
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
 
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #60a5fa;
-  --primary-bg: #eff6ff;
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #60a5fa;
+  --color-primary-bg: #eff6ff;
 
-  --secondary-1: #10b981;
-  --secondary-2: #8b5cf6;
-  --secondary-3: #f59e0b;
-  --secondary-4: #ef4444;
-  --secondary-5: #ec4899;
+  --color-secondary-1: #10b981;
+  --color-secondary-2: #8b5cf6;
+  --color-secondary-3: #f59e0b;
+  --color-secondary-4: #ef4444;
+  --color-secondary-5: #ec4899;
 
-  --border: #e5e7eb;
-  --border-light: #f3f4f6;
-  --border-dark: #d1d5db;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+  --color-border-dark: #d1d5db;
 
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --warning: #f59e0b;
-  --warning-bg: #fef3c7;
-  --danger: #ef4444;
-  --danger-bg: #fee2e2;
-  --success: #10b981;
-  --success-bg: #d1fae5;
+  --color-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --color-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --color-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fee2e2;
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
 }
 
 .dark {
@@ -60,7 +60,20 @@
   --danger-bg: #7f1d1d;
   --success-bg: #064e3b;
 }
-
+@font-face {
+  font-family: iransans;
+  src:
+    url(/assets/fonts/iranyekan-regular.woff2),
+    url(/assets/fonts/iranyekan-bold.woff2);
+}
+@font-face {
+  font-family: vazir;
+  src:
+    url("/assets/fonts/VAZIR-REGULAR.TTF"), url("/assets/fonts/VAZIR-BOLD.TTF");
+}
+body {
+  @apply text-[1rem] bg-(--background-2) text-(--main-text) font-[iransans,vazir];
+}
 body {
   background-color: var(--bg-body);
   color: var(--text-primary);

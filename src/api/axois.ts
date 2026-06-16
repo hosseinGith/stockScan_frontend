@@ -1,7 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
-import { store } from "../stores";
-import { setIsLoading } from "../stores/ui";
+import { store } from "../shared/stores";
+import { setIsLoading } from "../shared/stores/ui";
 import { faToEnNumbers, url } from "../utils";
 
 const apiClient = axios.create({
