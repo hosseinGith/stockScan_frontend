@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
-import { addProduct } from "../../shared/stores/slices/productSlice";
-import { showToast } from "../../shared/stores/slices/uiSlice";
-import { generateId } from "../../shared/utils/helpers";
-import type { Product } from "../../shared/types/product";
-import BottomNav from "../../shared/components/BottomNav";
 
-// کتابخانه اسکنر
-// import { Html5Qrcode } from "html5-qrcode";
+import { showToast } from "../../shared/stores/slices/uiSlice";
+
+import BottomNav from "../../shared/components/BottomNav";
+import { Html5Qrcode } from "html5-qrcode";
+import { useCreateProduct } from "../../shared/hooks/queries/useProducts";
+import { toast } from "sonner";
 
 const ScanProduct: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +20,15 @@ const ScanProduct: React.FC = () => {
   const [manualBarcode, setManualBarcode] = useState<string>("");
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [showForm, setShowForm] = useState<boolean>(false);
-
-  // فرم داده
+  const [, setIsScannerReady] = useState<boolean>(false);
+  const formDataInitialData = {
+    category: "",
+    description: "",
+    imageUrl: "",
+    minQuantity: 0,
+    isActive: true,
+  };
+  const [formData, setFormData] = useState(formDataInitialData);
   const [formName, setFormName] = useState<string>("");
   const [formPrice, setFormPrice] = useState<number>(0);
   const [formQuantity, setFormQuantity] = useState<number>(1);
@@ -29,13 +36,38 @@ const ScanProduct: React.FC = () => {
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scannerContainerId = "barcode-scanner";
+  const isMountedRef = useRef<boolean>(true);
+  const isScanningRef = useRef<boolean>(false);
 
-  // شروع اسکنر
-  const startScanner = async () => {
-    if (isScanning) return;
+  const startScanner = useCallback(async () => {
+    if (isScanningRef.current) {
+      return;
+    }
+
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    const element = document.getElementById(scannerContainerId);
+    if (!element) {
+      return;
+    }
 
     try {
+      if (scannerRef.current) {
+        try {
+          await scannerRef.current.stop();
+          scannerRef.current.clear();
+        } catch {
+          /* empty */
+        }
+        scannerRef.current = null;
+      }
+
       scannerRef.current = new Html5Qrcode(scannerContainerId);
+      isScanningRef.current = true;
+      setIsScanning(true);
+
       await scannerRef.current.start(
         { facingMode: "environment" },
         {
@@ -43,103 +75,158 @@ const ScanProduct: React.FC = () => {
           qrbox: { width: 280, height: 200 },
         },
         (decodedText) => {
-          // وقتی بارکد پیدا شد
-          stopScanner();
-          setScannedBarcode(decodedText);
-          setShowForm(true);
-          dispatch(
-            showToast({ message: "بارکد با موفقیت اسکن شد", type: "success" }),
-          );
+          if (decodedText && isMountedRef.current) {
+            stopScanner();
+            setScannedBarcode(decodedText);
+            setShowForm(true);
+
+            toast.success("بارکد با موفقیت اسکن شد");
+          }
         },
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (_errorMessage) => {
-          // خطاهای معمولی رو نادیده می‌گیریم
-        },
+        () => {},
       );
-      setIsScanning(true);
+
+      setIsScannerReady(true);
     } catch (error) {
       console.error("خطا در شروع اسکنر:", error);
-      dispatch(
-        showToast({ message: "دسترسی به دوربین ممکن نیست", type: "error" }),
-      );
-    }
-  };
+      if (isMountedRef.current) {
+        toast.success("دسترسی به دوربین ممکن نیست");
 
-  // توقف اسکنر
-  const stopScanner = async () => {
-    if (scannerRef.current && isScanning) {
+        setIsScanning(false);
+        isScanningRef.current = false;
+      }
+    }
+  }, [dispatch]);
+
+  async function stopScanner() {
+    if (scannerRef.current && isScanningRef.current) {
+      try {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
+        scannerRef.current = null;
+        isScanningRef.current = false;
+        setIsScanning(false);
+        setIsScannerReady(false);
+      } catch (error) {
+        console.error("خطا در توقف اسکنر:", error);
+
+        scannerRef.current = null;
+        isScanningRef.current = false;
+        setIsScanning(false);
+      }
+    } else {
+      isScanningRef.current = false;
+      setIsScanning(false);
+    }
+  }
+
+  const cleanupScanner = useCallback(async () => {
+    if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
         scannerRef.current.clear();
-        setIsScanning(false);
       } catch (error) {
-        console.error("خطا در توقف اسکنر:", error);
+        console.error("خطا در پاکسازی اسکنر:", error);
       }
+      scannerRef.current = null;
     }
-  };
 
-  // بررسی تکراری نبودن بارکد
+    isScanningRef.current = false;
+    setIsScanning(false);
+    setIsScannerReady(false);
+  }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      cleanupScanner();
+    };
+  }, [cleanupScanner]);
+
+  useEffect(() => {
+    console.log(activeTab);
+
+    if (activeTab === "manual") {
+      stopScanner();
+      return;
+    }
+
+    if (showForm) {
+      stopScanner();
+      return;
+    }
+
+    if (activeTab === "scan" && !showForm && isMountedRef.current) {
+      const timer = setTimeout(() => {
+        if (isMountedRef.current && activeTab === "scan" && !showForm) {
+          startScanner();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+
+    return () => {
+      if (activeTab !== "scan" || showForm) {
+        stopScanner();
+      }
+    };
+  }, [activeTab, showForm, startScanner]);
+
   const isBarcodeDuplicate = (barcode: string): boolean => {
     return products.some((p) => p.barcode === barcode);
   };
-
-  // ذخیره کالا
-  const handleSaveProduct = () => {
+  const createProduct = useCreateProduct();
+  const handleSaveProduct = async () => {
     const barcode = activeTab === "scan" ? scannedBarcode : manualBarcode;
 
     if (!barcode) {
-      dispatch(showToast({ message: "بارکد نامعتبر است", type: "error" }));
+      toast.error("بارکد نامعتبر است");
       return;
     }
 
     if (!formName.trim()) {
-      dispatch(
-        showToast({ message: "لطفاً نام کالا را وارد کنید", type: "error" }),
-      );
+      toast.error("لطفاً نام کالا را وارد کنید");
+
       return;
     }
 
     if (formPrice <= 0) {
-      dispatch(
-        showToast({ message: "لطفاً قیمت معتبر وارد کنید", type: "error" }),
-      );
+      toast.error("لطفاً قیمت معتبر وارد کنید");
+
       return;
     }
 
     if (isBarcodeDuplicate(barcode)) {
-      dispatch(
-        showToast({
-          message: "کالا با این بارکد قبلاً ثبت شده است",
-          type: "warning",
-        }),
-      );
+      toast.warning("کالا با این بارکد قبلاً ثبت شده است");
       return;
     }
 
-    const newProduct: Product = {
-      id: generateId(),
+    const newProduct = {
+      ...formData,
+      isActive: true,
       barcode,
       name: formName,
       price: formPrice,
       quantity: formQuantity,
-      expiryDate: formExpiry || null,
-      createdAt: new Date().toISOString(),
+      expiryDate: formExpiry,
     };
+    console.log(345345);
 
-    dispatch(addProduct(newProduct));
-    dispatch(
-      showToast({ message: `${formName} با موفقیت اضافه شد`, type: "success" }),
-    );
+    const { data } = await createProduct.mutateAsync(newProduct);
+    toast.success(`${formName} با موفقیت اضافه شد`);
 
-    // ریست فرم
     resetForm();
-
-    // اگر از تب اسکن بود، اسکنر رو دوباره راه اندازی کن
+    handleCancelForm();
     if (activeTab === "scan") {
       setShowForm(false);
       setScannedBarcode("");
+
       setTimeout(() => {
-        startScanner();
+        if (isMountedRef.current && activeTab === "scan" && !showForm) {
+          startScanner();
+        }
       }, 500);
     } else {
       setManualBarcode("");
@@ -148,6 +235,7 @@ const ScanProduct: React.FC = () => {
 
   const resetForm = () => {
     setFormName("");
+    setFormData(formDataInitialData);
     setFormPrice(0);
     setFormQuantity(1);
     setFormExpiry("");
@@ -160,44 +248,25 @@ const ScanProduct: React.FC = () => {
     setShowForm(false);
     setScannedBarcode("");
     resetForm();
-    if (activeTab === "scan") {
-      startScanner();
+    if (activeTab === "scan" && isMountedRef.current) {
+      setTimeout(() => {
+        startScanner();
+      }, 300);
     }
   };
 
   const handleManualSubmit = () => {
     if (!manualBarcode.trim()) {
-      dispatch(
-        showToast({ message: "لطفاً بارکد را وارد کنید", type: "error" }),
-      );
+      toast.error("لطفاً بارکد را وارد کنید");
+
       return;
     }
     setScannedBarcode(manualBarcode);
     setShowForm(true);
   };
 
-  // پاکسازی هنگام unmount
-  useEffect(() => {
-    return () => {
-      if (scannerRef.current && isScanning) {
-        scannerRef.current.stop().catch(console.error);
-      }
-    };
-  }, []);
-
-  // شروع خودکار اسکنر هنگام رفتن به تب اسکن
-  useEffect(() => {
-    (() => {
-      if (activeTab === "scan" && !showForm) {
-        startScanner();
-      } else if (activeTab === "manual") {
-        stopScanner();
-      }
-    })();
-  }, [activeTab, showForm]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 pb-24">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 pb-24">
       <div className="max-w-2xl mx-auto px-4 py-5">
         {/* هدر */}
         <div className="flex items-center justify-between mb-6">
@@ -208,7 +277,7 @@ const ScanProduct: React.FC = () => {
             >
               <i className="fas fa-arrow-right text-lg"></i>
             </button>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               افزودن کالا
             </h1>
           </div>
@@ -224,7 +293,7 @@ const ScanProduct: React.FC = () => {
             }}
             className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
               activeTab === "scan"
-                ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
+                ? "bg-linear-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
                 : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
@@ -237,7 +306,7 @@ const ScanProduct: React.FC = () => {
             }}
             className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
               activeTab === "manual"
-                ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
+                ? "bg-linear-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
                 : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
@@ -253,21 +322,33 @@ const ScanProduct: React.FC = () => {
                 دوربین را روی بارکد کالا قرار دهید
               </p>
             </div>
+
+            {/* محفظه اسکنر - با key برای رندر مجدد */}
             <div
+              key={scannerContainerId}
               id={scannerContainerId}
               className="w-full rounded-2xl overflow-hidden bg-black"
               style={{ minHeight: "300px" }}
             ></div>
+
             <div className="flex gap-2 mt-4">
-              {isScanning && (
+              {isScanning ? (
                 <button
                   onClick={stopScanner}
                   className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600 transition"
                 >
                   <i className="fas fa-stop ml-1"></i> توقف اسکن
                 </button>
+              ) : (
+                <button
+                  onClick={startScanner}
+                  className="flex-1 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition"
+                >
+                  <i className="fas fa-play ml-1"></i> شروع اسکن
+                </button>
               )}
             </div>
+
             <p className="text-center text-xs text-gray-400 mt-4">
               💡 نکته: بارکد را در نور کافی و با فاصله مناسب قرار دهید
             </p>
@@ -278,7 +359,7 @@ const ScanProduct: React.FC = () => {
         {activeTab === "manual" && !showForm && (
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-16 h-16 bg-linear-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
                 <i className="fas fa-barcode text-2xl text-blue-500"></i>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -294,7 +375,7 @@ const ScanProduct: React.FC = () => {
             />
             <button
               onClick={handleManualSubmit}
-              className="w-full mt-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+              className="w-full mt-4 py-3 bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
             >
               <i className="fas fa-arrow-left ml-1"></i> ادامه برای ثبت کالا
             </button>
@@ -303,7 +384,13 @@ const ScanProduct: React.FC = () => {
 
         {/* فرم ثبت کالا */}
         {showForm && (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl animate-fade-in">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveProduct();
+            }}
+            className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl animate-fade-in"
+          >
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                 <i className="fas fa-plus-circle text-green-500 ml-2"></i>
@@ -334,12 +421,60 @@ const ScanProduct: React.FC = () => {
                   نام کالا *
                 </label>
                 <input
+                  required
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="مثال: رب گوجه فرنگی"
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                  className="w-full px-4 py-3  rounded-xl  text-sm transition"
                   autoFocus
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    دسته بندی *
+                  </label>
+                  <input
+                    required
+                    type="string"
+                    value={formData.category || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    placeholder="0"
+                    className="w-full px-4 py-3  rounded-xl  text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    توضیحات
+                  </label>
+                  <input
+                    type="string"
+                    value={formData.description || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full px-4 py-3  rounded-xl  text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  هشدار حداقل
+                </label>
+                <input
+                  type="number"
+                  value={formData.minQuantity || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minQuantity: Number(e.target.value),
+                    })
+                  }
+                  className="w-full px-4 py-3  rounded-xl  text-sm"
                 />
               </div>
 
@@ -349,11 +484,12 @@ const ScanProduct: React.FC = () => {
                     قیمت (تومان) *
                   </label>
                   <input
+                    required
                     type="number"
                     value={formPrice || ""}
                     onChange={(e) => setFormPrice(Number(e.target.value))}
                     placeholder="0"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-3  rounded-xl  text-sm"
                   />
                 </div>
                 <div>
@@ -361,34 +497,34 @@ const ScanProduct: React.FC = () => {
                     تعداد/موجودی
                   </label>
                   <input
+                    required
                     type="number"
                     value={formQuantity}
                     onChange={(e) => setFormQuantity(Number(e.target.value))}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-3  rounded-xl  text-sm"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs text-gray-500 mb-1">
-                  تاریخ انقضا (اختیاری)
+                  تاریخ انقضا *
                 </label>
                 <input
+                  required
                   type="date"
                   value={formExpiry}
                   onChange={(e) => setFormExpiry(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full px-4 py-3  rounded-xl  text-sm"
                 />
               </div>
 
               <div className="flex gap-3 pt-3">
-                <button
-                  onClick={handleSaveProduct}
-                  className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-green-500/25 hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
-                >
+                <button className="flex-1 py-3 bg-linear-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-green-500/25 hover:shadow-xl hover:scale-[1.02] transition-all duration-200">
                   <i className="fas fa-save ml-1"></i> ذخیره کالا
                 </button>
                 <button
+                  type="button"
                   onClick={handleCancelForm}
                   className="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 transition"
                 >
@@ -396,13 +532,12 @@ const ScanProduct: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         )}
 
         <BottomNav />
       </div>
 
-      {/* انیمیشن fade-in */}
       <style>{`
         @keyframes fadeIn {
           from {

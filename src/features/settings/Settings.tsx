@@ -158,7 +158,7 @@ const Settings: React.FC = () => {
     : "امروز";
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 pb-24">
+    <div className="min-h-screen bg-(--color-bg-body)">
       <div className="max-w-2xl mx-auto px-4 py-5">
         {/* هدر */}
         <div className="flex items-center justify-between mb-6">
@@ -199,10 +199,10 @@ const Settings: React.FC = () => {
                 </div>
               </div>
               <div
-                className={`w-12 h-6 rounded-full transition-colors ${theme === "dark" ? "bg-blue-500" : "bg-gray-300"}`}
+                className={`w-12 h-6 rounded-full relative transition-colors ${theme === "dark" ? "bg-(--color-primary)" : "bg-gray-300"}`}
               >
                 <div
-                  className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform mt-0.5 ${theme === "dark" ? "translate-x-6" : "translate-x-0.5"}`}
+                  className={`w-5 h-5 rounded-full left-0 relative bg-white shadow-md transform transition-transform mt-0.5 ${theme !== "dark" ? "" :""}`}
                 ></div>
               </div>
             </button>

@@ -50,6 +50,8 @@ export interface ProductFilters {
   maxPrice?: number;
   expired?: boolean;
   expiringSoon?: boolean;
+  status?: ProductStatus; 
+  inStock?: boolean;
   lowStock?: boolean;
   isActive?: boolean;
   sortBy?:

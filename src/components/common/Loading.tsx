@@ -6,7 +6,7 @@ const Loading = () => {
 
   return (
     <div
-      className={`${!isLoading ? "opacity-0 pointer-events-none" : ""} fixed inset-0 bg-(--background-2) text-(--foreground) flex items-center justify-center z-50`}
+      className={`${!isLoading ? "opacity-0 pointer-events-none" : ""} fixed inset-0 bg-(--color-bg-body) text-(--foreground) flex items-center justify-center z-50`}
     >
       <div className="text-center">
         <div className="flex justify-center ">

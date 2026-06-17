@@ -47,6 +47,9 @@ importers:
       react-calendar:
         specifier: ^6.0.1
         version: 6.0.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react-date-object:
+        specifier: ^2.1.9
+        version: 2.1.9
       react-dom:
         specifier: ^19.2.6
         version: 19.2.6(react@19.2.6)
@@ -62,6 +65,9 @@ importers:
       react-loading-skeleton:
         specifier: ^3.5.0
         version: 3.5.0(react@19.2.6)
+      react-multi-date-picker:
+        specifier: ^4.5.2
+        version: 4.5.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-query:
         specifier: ^3.39.3
         version: 3.39.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -1953,6 +1959,9 @@ packages:
       '@types/react':
         optional: true
 
+  react-date-object@2.1.9:
+    resolution: {integrity: sha512-BHxD/quWOTo9fLKV/cfL/M31ePoj4a1JaJ/CnOf8Ndg3mrkh4x9wEMMkCfTrzduxDOgU8ZgR8uarhqI5G71sTg==}
+
   react-datepicker@9.1.0:
     resolution: {integrity: sha512-lOp+m5bc+ttgtB5MHEjwiVu4nlp4CvJLS/PG1OiOe5pmg9kV73pEqO8H0Geqvg2E8gjqTaL9eRhSe+ZpeKP3nA==}
     peerDependencies:
@@ -1967,6 +1976,12 @@ packages:
     resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
     peerDependencies:
       react: ^19.2.6
+
+  react-element-popper@2.1.7:
+    resolution: {integrity: sha512-tuM2OxKlW32h+6uFSK6EENHPeZ2OGgOipHfOAl+VLWEv9/j3QkSGbD+ADX3A9uJlmq24i37n28RjJmAbGTfpEg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-error-boundary@6.1.2:
     resolution: {integrity: sha512-3DpCr5HVdZ0caUjYE/kIHBEJN0mNP3ZCgf16c48uJ5TbWjorKVp+YG8W3XqlJ7vJAVNw6wNIImyPXmFydwmyng==}
@@ -1993,6 +2008,12 @@ packages:
     resolution: {integrity: sha512-gxxSyLbrEAdXTKgfbpBEFZCO/P153DnqSCQau2+o6lNy1jgMRr2MmRmOzMmyrwSaSYLRB8g7b0waYPmUjz7IhQ==}
     peerDependencies:
       react: '>=16.8.0'
+
+  react-multi-date-picker@4.5.2:
+    resolution: {integrity: sha512-FgWjZB3Z6IA6XpcWiLPk85PwcRUhOiYhKK42o5k672gD/n2I6rzPfQ8bUrldOIiF/Z7FfOCdH7a6FeubzqteLg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-query@3.39.3:
     resolution: {integrity: sha512-nLfLz7GiohKTJDuT4us4X3h/8unOh+00MLb2yJoGTPjxKs2bc1iDhkNx2bd5MKklXnOD3NrVZ+J2UXujA5In4g==}
@@ -4036,6 +4057,8 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
+  react-date-object@2.1.9: {}
+
   react-datepicker@9.1.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:
       '@floating-ui/react': 0.27.19(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -4048,6 +4071,11 @@ snapshots:
     dependencies:
       react: 19.2.6
       scheduler: 0.27.0
+
+  react-element-popper@2.1.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
 
   react-error-boundary@6.1.2(react@19.2.6):
     dependencies:
@@ -4069,6 +4097,13 @@ snapshots:
   react-loading-skeleton@3.5.0(react@19.2.6):
     dependencies:
       react: 19.2.6
+
+  react-multi-date-picker@4.5.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+      react-date-object: 2.1.9
+      react-dom: 19.2.6(react@19.2.6)
+      react-element-popper: 2.1.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
   react-query@3.39.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:

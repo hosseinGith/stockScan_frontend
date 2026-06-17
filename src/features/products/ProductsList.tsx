@@ -25,6 +25,7 @@ import {
 import BottomNav from "../../shared/components/BottomNav";
 import EditProductModal from "./components/EditProductModal";
 import type { Product } from "../../shared/types/index";
+import { toast } from "sonner";
 
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
@@ -105,7 +106,7 @@ const ProductsList: React.FC = () => {
 
   const handleDelete = (id: string) => {
     dispatch(deleteProduct(id));
-    dispatch(showToast({ message: "کالا حذف شد", type: "success" }));
+    toast.success("کالا حذف شد");
   };
 
   const handleCloseModal = () => {
@@ -114,7 +115,7 @@ const ProductsList: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 pb-24">
+    <div className="min-h-screen pb-24 bg-(--color-bg-body)">
       <div className="max-w-2xl mx-auto px-4 py-5">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -291,7 +292,7 @@ const ProductsList: React.FC = () => {
                           e.stopPropagation();
                           handleEdit(product);
                         }}
-                        className="w-9 h-9 rounded-full bg-white dark:bg-gray-700 shadow-md flex items-center justify-center text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-200"
+                        className="w-9 h-9 rounded-full bg-white dark:bg-gray-700 shadow-md flex items-center justify-center text-blue-500 hover:bg-(--color-primary) hover:text-white transition-all duration-200"
                       >
                         <i className="fas fa-edit text-sm"></i>
                       </button>

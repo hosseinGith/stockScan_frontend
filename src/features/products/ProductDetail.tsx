@@ -5,7 +5,6 @@ import {
   updateProduct,
   deleteProduct,
 } from "../../shared/stores/slices/productSlice";
-import { showToast } from "../../shared/stores/slices/uiSlice";
 import {
   formatPrice,
   formatDateToPersian,
@@ -13,6 +12,7 @@ import {
   isExpiringSoon,
 } from "../../shared/utils/helpers";
 import BottomNav from "../../shared/components/BottomNav";
+import { toast } from "sonner";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -79,15 +79,13 @@ const ProductDetail: React.FC = () => {
 
   const handleSaveEdit = () => {
     if (!editName.trim()) {
-      dispatch(
-        showToast({ message: "لطفاً نام کالا را وارد کنید", type: "error" }),
-      );
+      toast.error("لطفاً نام کالا را وارد کنید");
+
       return;
     }
     if (editPrice <= 0) {
-      dispatch(
-        showToast({ message: "لطفاً قیمت معتبر وارد کنید", type: "error" }),
-      );
+      toast.error("لطفاً قیمت معتبر وارد کنید");
+
       return;
     }
 
@@ -102,17 +100,15 @@ const ProductDetail: React.FC = () => {
         },
       }),
     );
+    toast.success("کالا با موفقیت ویرایش شد");
 
-    dispatch(
-      showToast({ message: "کالا با موفقیت ویرایش شد", type: "success" }),
-    );
     setIsEditing(false);
   };
 
   const handleDelete = () => {
     if (confirm("آیا از حذف این کالا مطمئن هستید؟")) {
       dispatch(deleteProduct(product.id));
-      dispatch(showToast({ message: "کالا حذف شد", type: "success" }));
+      toast.success("کالا حذف شد");
       navigate("/products");
     }
   };
@@ -138,7 +134,7 @@ const ProductDetail: React.FC = () => {
               <>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="w-10 h-10 rounded-full bg-blue-500 text-white shadow-md flex items-center justify-center hover:bg-blue-600 transition"
+                  className="w-10 h-10 rounded-full bg-(--color-primary) text-white shadow-md flex items-center justify-center hover:bg-blue-600 transition"
                 >
                   <i className="fas fa-edit text-sm"></i>
                 </button>

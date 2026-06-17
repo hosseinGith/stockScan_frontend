@@ -21,7 +21,6 @@ const ProductSearch: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [debouncedSearch] = useDebounce(filters.search, 500);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -34,6 +33,8 @@ const ProductSearch: React.FC = () => {
     status: (searchParams.get("status") as FilterState["status"]) || "all",
     inStock: searchParams.get("inStock") === "true",
   });
+  const [debouncedSearch] = useDebounce(filters.search, 500);
+
   const { data, isLoading, isFetching, error, refetch } = useProductSearch({
     search: debouncedSearch || undefined,
     categoryId: filters.category || undefined,
@@ -43,7 +44,7 @@ const ProductSearch: React.FC = () => {
     status: filters.status === "all" ? undefined : filters.status,
     inStock: filters.inStock || undefined,
   });
-
+  const searchData = data?.data || [];
   const { data: categories } = useCategories();
 
   useEffect(() => {
@@ -110,37 +111,60 @@ const ProductSearch: React.FC = () => {
   const goToProduct = (id: string) => {
     navigate(`/product/${id}`);
   };
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-md">
+          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i>
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+            خطایی رخ داد
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            دریافت اطلاعات با خطا مواجه شد. لطفاً دوباره تلاش کنید.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
       <div className="max-w-4xl mx-auto">
         {/* هدر */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-            <i className="fas fa-search text-blue-500 ml-2"></i>
-            جستجوی کالا
-          </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-md flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+            >
+              <i className="fas fa-arrow-right text-lg"></i>
+            </button>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              <i className="fas fa-search text-blue-500 ml-2"></i>
+              جستجوی کالا
+            </h1>
+          </div>
+
           <div className="flex gap-2">
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                 isFilterOpen || hasActiveFilters
-                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                  ? "bg-(--color-primary) text-white shadow-lg shadow-blue-500/25"
                   : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 shadow-md hover:shadow-lg"
               }`}
             >
-              <i className="fas fa-sliders-h ml-1"></i>
+              <i className="fas fa-sliders-h"></i>
               فیلترها
               {hasActiveFilters && (
-                <span className="mr-1 bg-white text-blue-500 text-xs rounded-full w-5 h-5 inline-flex items-center justify-center">
-                  {
-                    Object.values(filters).filter(
-                      (v) => v && v !== "all" && v !== "name",
-                    ).length
-                  }
+                <span className="bg-white text-blue-500 text-xs rounded-full w-5 h-5 inline-flex items-center justify-center">
+                  {activeFilterCount}
                 </span>
               )}
             </button>
+
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
@@ -196,10 +220,11 @@ const ProductSearch: React.FC = () => {
                       className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-white transition"
                     >
                       <option value="">همه دسته‌ها</option>
-                      <option value="food">خوراکی</option>
-                      <option value="hygiene">بهداشتی</option>
-                      <option value="electronics">الکترونیک</option>
-                      <option value="clothing">پوشاک</option>
+                      {categories?.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -297,7 +322,7 @@ const ProductSearch: React.FC = () => {
                 <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                   <button
                     onClick={() => setIsFilterOpen(false)}
-                    className="flex-1 py-2.5 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition"
+                    className="flex-1 py-2.5 bg-(--color-primary) text-white rounded-xl font-medium hover:bg-blue-600 transition"
                   >
                     اعمال فیلترها
                   </button>
@@ -317,7 +342,7 @@ const ProductSearch: React.FC = () => {
         {/* آمار نتایج */}
         {/* ========================================== */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
             <span>
               <span className="font-bold text-gray-800 dark:text-white">
                 {stats.total}
@@ -328,14 +353,26 @@ const ProductSearch: React.FC = () => {
               <span>
                 ارزش کل:{" "}
                 <span className="font-bold text-gray-800 dark:text-white">
-                  {Number(stats.totalValue).toLocaleString("fa-IR")} تومان
+                  {formatPrice(stats.totalValue)}
                 </span>
               </span>
             )}
+            {stats.expiringSoonCount > 0 && (
+              <span className="text-yellow-600 dark:text-yellow-400">
+                ⚠️ {stats.expiringSoonCount} در حال انقضا
+              </span>
+            )}
+            {stats.expiredCount > 0 && (
+              <span className="text-red-600 dark:text-red-400">
+                ❌ {stats.expiredCount} منقضی شده
+              </span>
+            )}
           </div>
-          {filters.search && (
-            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full">
-              "{filters.search}"
+
+          {isFetching && (
+            <span className="text-xs text-gray-400">
+              <i className="fas fa-spinner fa-spin ml-1"></i>
+              در حال بارگذاری...
             </span>
           )}
         </div>
@@ -343,7 +380,27 @@ const ProductSearch: React.FC = () => {
         {/* ========================================== */}
         {/* لیست محصولات */}
         {/* ========================================== */}
-        {filteredProducts.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-md">
+            <i className="fas fa-exclamation-triangle text-3xl text-red-500 mb-4"></i>
+            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+              خطا در بارگذاری
+            </h3>
+            <p className="text-sm text-gray-400">
+              مشکلی در ارتباط با سرور رخ داده است. لطفاً دوباره تلاش کنید.
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-4 text-blue-500 text-sm font-medium hover:underline"
+            >
+              تلاش مجدد
+            </button>
+          </div>
+        ) : data?.data?.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-md">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="fas fa-box-open text-3xl text-gray-400"></i>
@@ -363,7 +420,7 @@ const ProductSearch: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filteredProducts.map((product: Product) => {
+            {data?.data?.map((product) => {
               const isExpired =
                 product.expiryDate && new Date(product.expiryDate) < new Date();
               const isExpiringSoon =
@@ -397,12 +454,18 @@ const ProductSearch: React.FC = () => {
                       </p>
                       <div className="flex items-center gap-3 mt-2">
                         <span className="text-blue-600 dark:text-blue-400 font-bold">
-                          {Number(product.price).toLocaleString("fa-IR")} تومان
+                          {formatPrice(product.price)}
                         </span>
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           {product.quantity} عدد
                         </span>
                       </div>
+                      {product.categoryName && (
+                        <span className="text-xs text-gray-400 mt-1 block">
+                          <i className="fas fa-tag ml-1"></i>
+                          {product.categoryName}
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       {isExpired ? (
@@ -434,6 +497,45 @@ const ProductSearch: React.FC = () => {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* ========================================== */}
+        {/* Pagination */}
+        {/* ========================================== */}
+        {data && data.total > data.limit && (
+          <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              disabled={data.offset === 0}
+              onClick={() => {
+                const params = new URLSearchParams(searchParams);
+                params.set(
+                  "offset",
+                  String(Math.max(0, data.offset - data.limit)),
+                );
+                setSearchParams(params);
+              }}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition"
+            >
+              <i className="fas fa-chevron-right ml-1"></i>
+              قبلی
+            </button>
+            <span className="text-sm text-gray-500">
+              صفحه {Math.floor(data.offset / data.limit) + 1} از{" "}
+              {Math.ceil(data.total / data.limit)}
+            </span>
+            <button
+              disabled={!data.hasMore}
+              onClick={() => {
+                const params = new URLSearchParams(searchParams);
+                params.set("offset", String(data.offset + data.limit));
+                setSearchParams(params);
+              }}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition"
+            >
+              بعدی
+              <i className="fas fa-chevron-left mr-1"></i>
+            </button>
           </div>
         )}
       </div>

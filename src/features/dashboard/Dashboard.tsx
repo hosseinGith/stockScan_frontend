@@ -15,8 +15,6 @@ import {
 import BottomNav from "../../shared/components/BottomNav";
 import Header from "../../shared/components/Header";
 import StatsCard from "./components/StatsCard";
-import Toast from "../../shared/components/Toast";
-import { hideToast } from "../../shared/stores/slices/uiSlice";
 import { useNavigate } from "react-router-dom";
 import { useDashboardOverview } from "../../shared/hooks/queries/useDashboard";
 import { motion } from "framer-motion";
@@ -25,21 +23,12 @@ const Dashboard: React.FC = () => {
   const { data, isLoading, error } = useDashboardOverview();
   const dashboardData = data?.data;
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const products = useAppSelector(selectAllProducts);
   const totalProducts = useAppSelector(selectProductsCount);
   const totalValue = useAppSelector(selectTotalValue);
-  const theme = useAppSelector(selectTheme);
-  const toast = useAppSelector((state) => state.ui.toast);
 
   const [date, setDate] = useState("");
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
+
   useEffect(() => {
     (() => {
       setDate(
@@ -71,9 +60,9 @@ const Dashboard: React.FC = () => {
   const expiredCount = products.filter((p) => isExpired(p.expiryDate)).length;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5 pb-24 min-h-screen bg-body">
+    <div className="max-w-2xl mx-auto px-4 py-5 pb-24 min-h-screen bg-(--color-bg-body)">
       <Header
-        title="انبارک"
+        title="استوک اسکن"
         rightAction={
           <button className="relative">
             <i className="fas fa-bell text-secondary text-xl"></i>
@@ -95,7 +84,7 @@ const Dashboard: React.FC = () => {
         className="bg-linear-to-r from-primary to-primary-dark rounded-2xl p-5 text-white mb-6 shadow-lg"
       >
         <p className="text-sm opacity-90">سلام 👋</p>
-        <p className="font-bold text-lg mt-1">به انبارک خوش اومدی</p>
+        <p className="font-bold text-lg mt-1">به استوک اسکن خوش اومدی</p>
         <p className="text-xs opacity-80 mt-1">
           بارکد کالاها رو اسکن کن و انبارت رو مدیریت کن
         </p>
@@ -242,14 +231,6 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       <BottomNav />
-
-      {toast?.visible && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => dispatch(hideToast())}
-        />
-      )}
     </div>
   );
 };

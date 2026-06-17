@@ -38,27 +38,27 @@
 }
 
 .dark {
-  --bg-body: #111827;
-  --bg-surface: #1f2937;
-  --bg-card: #374151;
-  --bg-hover: #4b5563;
+  --color-bg-body: #111827;
+  --color-bg-surface: #1f2937;
+  --color-bg-card: #374151;
+  --color-bg-hover: #4b5563;
 
-  --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
 
-  --primary: #60a5fa;
-  --primary-dark: #3b82f6;
-  --primary-light: #93c5fd;
-  --primary-bg: #1e3a8a;
+  --color-primary: #60a5fa;
+  --color-primary-dark: #3b82f6;
+  --color-primary-light: #93c5fd;
+  --color-primary-bg: #1e3a8a;
 
-  --border: #374151;
-  --border-light: #4b5563;
-  --border-dark: #1f2937;
+  --color-border: #374151;
+  --color-border-light: #4b5563;
+  --color-border-dark: #1f2937;
 
-  --warning-bg: #78350f;
-  --danger-bg: #7f1d1d;
-  --success-bg: #064e3b;
+  --color-warning-bg: #78350f;
+  --color-danger-bg: #7f1d1d;
+  --color-success-bg: #064e3b;
 }
 @font-face {
   font-family: iransans;
@@ -72,27 +72,27 @@
     url("/assets/fonts/VAZIR-REGULAR.TTF"), url("/assets/fonts/VAZIR-BOLD.TTF");
 }
 body {
-  @apply text-[1rem] bg-(--background-2) text-(--main-text) font-[iransans,vazir];
+  @apply text-[1rem] font-[iransans,vazir];
 }
 body {
-  background-color: var(--bg-body);
+  background-color: var(--color-bg-body);
   color: var(--text-primary);
 }
 
 .bg-surface {
-  background-color: var(--bg-surface);
+  background-color: var(--color-bg-surface);
 }
 .bg-card {
-  background-color: var(--bg-card);
+  background-color: var(--color-bg-card);
 }
 .text-primary {
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 .text-secondary {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 .border-default {
-  border-color: var(--border);
+  border-color: var(--color-border);
 }
 
 input,
@@ -103,7 +103,7 @@ button {
 }
 input {
   direction: auto;
-  @apply border-2 border-(--foreground-l) outline-0 transition-all  rounded-xl py-1 px-2;
+  @apply border-2 border-border outline-0 transition-all  rounded-xl py-1 px-2;
 }
 input[type="number"] {
   direction: ltr;
