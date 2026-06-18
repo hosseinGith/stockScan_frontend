@@ -11,7 +11,6 @@ import ScanProduct from "./features/scanner/ScanProduct";
 import ProductDetail from "./features/products/ProductDetail";
 import Settings from "./features/settings/Settings";
 import Auth from "./features/auth";
-import ProductSearch from "./features/products/ProductSearch";
 
 const Loading = lazy(() => import("./components/common/Loading"));
 
@@ -49,7 +48,6 @@ function App() {
               <Route path="/auth/" element={<Auth />} />
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsList />} />
-              <Route path="/products/search" element={<ProductSearch />} />
               <Route path="/scan" element={<ScanProduct />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/settings" element={<Settings />} />
