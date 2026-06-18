@@ -82,6 +82,11 @@ export interface ApiResponse<T> {
   errors?: string[];
   timestamp: string;
 }
+export interface Stats {
+  expiredCount: number;
+  expiringSoonCount: number;
+  totalValue: number;
+}
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -89,6 +94,7 @@ export interface PaginatedResponse<T> {
   limit: number;
   offset: number;
   hasMore: boolean;
+  stats: Stats;
 }
 
 export type ProductStatus =
