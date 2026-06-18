@@ -2,7 +2,9 @@ export const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 export const isExpired = (expiryDateStr: string | null): boolean => {
+  console.log(expiryDateStr);
   if (!expiryDateStr) return false;
+  
   return new Date(expiryDateStr) < today;
 };
 

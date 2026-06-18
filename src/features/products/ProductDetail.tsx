@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
 import {
   updateProduct,
   deleteProduct,
@@ -13,14 +12,17 @@ import {
 } from "../../shared/utils/helpers";
 import BottomNav from "../../shared/components/BottomNav";
 import { toast } from "sonner";
+import {
+  useProduct,
+  useUpdateProduct,
+} from "../../shared/hooks/queries/useProducts";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { mutate: updateProduct } = useUpdateProduct();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const product = useAppSelector((state) =>
-    state.products.items.find((p) => p.id === id),
-  );
+  const { data, isLoading, error } = useProduct(id || "");
+  const product = data;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -29,14 +31,18 @@ const ProductDetail: React.FC = () => {
   const [editExpiry, setEditExpiry] = useState("");
 
   useEffect(() => {
-    if (product) {
-      setEditName(product.name);
-      setEditPrice(product.price);
-      setEditQuantity(product.quantity);
-      setEditExpiry(product.expiryDate || "");
-    }
+    (() => {
+      if (product) {
+        setEditName(product.name);
+        setEditPrice(product.price);
+        setEditQuantity(product.quantity);
+        setEditExpiry(product.expiryDate || "");
+      }
+    })();
   }, [product]);
+  if (isLoading) return <>درحال دریافت اطلاعات</>;
 
+  if (error) return <>مشکل در دریافت اطلاعات</>;
   if (!product) {
     return (
       <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center">
@@ -88,18 +94,15 @@ const ProductDetail: React.FC = () => {
 
       return;
     }
-
-    dispatch(
-      updateProduct({
-        id: product.id,
-        updates: {
-          name: editName,
-          price: editPrice,
-          quantity: editQuantity,
-          expiryDate: editExpiry || null,
-        },
-      }),
-    );
+    updateProduct({
+      id: product.id,
+      data: {
+        name: editName,
+        price: editPrice,
+        quantity: editQuantity,
+        expiryDate: editExpiry || null,
+      },
+    });
     toast.success("کالا با موفقیت ویرایش شد");
 
     setIsEditing(false);
@@ -268,7 +271,7 @@ const ProductDetail: React.FC = () => {
                     </label>
                     <input
                       type="number"
-                      value={editPrice}
+                      value={Number(editPrice)}
                       onChange={(e) => setEditPrice(Number(e.target.value))}
                       className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
@@ -324,6 +327,12 @@ const ProductDetail: React.FC = () => {
             تکمیلی
           </h3>
           <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-500">بارکد کالا:</span>
+              <span className="text-gray-700 dark:text-gray-300 font-mono text-xs">
+                {product.barcode}
+              </span>
+            </div>{" "}
             <div className="flex justify-between">
               <span className="text-gray-500">شناسه کالا:</span>
               <span className="text-gray-700 dark:text-gray-300 font-mono text-xs">

@@ -3,6 +3,7 @@ import { productsApi } from "../../../api/endpoints/products.api";
 import type { CreateProductDto, UpdateProductDto } from "../../types/product";
 import { showToast } from "../../stores/slices/uiSlice";
 import { useAppDispatch } from "../../stores/hooks";
+import { toast } from "sonner";
 
 export const productKeys = {
   all: ["products"] as const,
@@ -11,7 +12,6 @@ export const productKeys = {
   details: () => [...productKeys.all, "detail"] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
 };
-
 export const useProducts = (params?: {
   search?: string;
   category?: string;
@@ -64,7 +64,6 @@ export const useCreateProduct = () => {
 
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateProductDto }) =>
@@ -74,17 +73,9 @@ export const useUpdateProduct = () => {
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
       });
-      dispatch(
-        showToast({ message: "کالا با موفقیت ویرایش شد", type: "success" }),
-      );
     },
-    onError: (error: unknown) => {
-      dispatch(
-        showToast({
-          message: error.response?.data?.message || "خطا در ویرایش کالا",
-          type: "error",
-        }),
-      );
+    onError: () => {
+      toast.error("مشکل در ذخیره کردن محصول.");
     },
   });
 };
