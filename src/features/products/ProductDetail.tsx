@@ -350,8 +350,7 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        <BottomNav />
-      </div>
+        </div>
     </div>
   );
 };

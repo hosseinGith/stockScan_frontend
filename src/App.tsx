@@ -11,6 +11,7 @@ import ScanProduct from "./features/scanner/ScanProduct";
 import ProductDetail from "./features/products/ProductDetail";
 import Settings from "./features/settings/Settings";
 import Auth from "./features/auth";
+import BottomNav from "./shared/components/BottomNav";
 
 const Loading = lazy(() => import("./components/common/Loading"));
 
@@ -43,6 +44,7 @@ function App() {
               }
             ></Suspense>
             {/* <CompleteFramerMotionDemo/> */}
+            <BottomNav />
             <Loading />
             <Routes>
               <Route path="/auth/" element={<Auth />} />

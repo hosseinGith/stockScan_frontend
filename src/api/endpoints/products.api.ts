@@ -34,4 +34,7 @@ export const productsApi = {
     apiClient.get<ApiResponse<PaginatedResponse<Product>>>("/products/search", {
       params,
     }),
+  getProductByBarcode: (barcode: string) => {
+    return apiClient.get<ApiResponse<any>>(`/products/barcode/${barcode}`);
+  },
 };

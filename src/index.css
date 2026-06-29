@@ -72,7 +72,7 @@
     url("/assets/fonts/VAZIR-REGULAR.TTF"), url("/assets/fonts/VAZIR-BOLD.TTF");
 }
 body {
-  @apply text-[1rem] font-[iransans,vazir];
+  @apply text-[1rem] font-[iransans,vazir_!important];
 }
 body {
   background-color: var(--color-bg-body);

@@ -370,8 +370,7 @@ const Settings: React.FC = () => {
           </div>
         )}
 
-        <BottomNav />
-      </div>
+        </div>
     </div>
   );
 };

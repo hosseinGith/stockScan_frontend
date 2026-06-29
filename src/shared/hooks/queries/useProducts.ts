@@ -5,6 +5,13 @@ import { showToast } from "../../stores/slices/uiSlice";
 import { useAppDispatch } from "../../stores/hooks";
 import { toast } from "sonner";
 
+export const useGetProductFromBarcode = (barcode: string) => {
+  return useQuery({
+    queryKey: ["product", "barcode", barcode],
+    queryFn: () => productsApi.getProductByBarcode(barcode).then((r) => r.data),
+    enabled: !!barcode,
+  });
+};
 export const productKeys = {
   all: ["products"] as const,
   lists: () => [...productKeys.all, "list"] as const,
