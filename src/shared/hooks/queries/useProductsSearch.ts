@@ -41,8 +41,8 @@ export const useProductSearch = (filters?: ProductFilters) => {
       const { data } = await productsApi.search(finalFilters);
       return data.data;
     },
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000,
+    gcTime: 0,
     enabled: true,
     placeholderData: (previousData) => previousData,
   });

@@ -14,10 +14,11 @@ export const useDashboardStats = () => {
   return useQuery({
     queryKey: dashboardKeys.stats(),
     queryFn: async () => {
-      const data  = await dashboardApi.getStats();
+      const data = await dashboardApi.getStats();
       return data;
     },
-    staleTime: 2 * 60 * 1000, // 2 دقیقه
+    staleTime: 0,
+    gcTime: 0,
   });
 };
 
@@ -25,10 +26,11 @@ export const useDashboardRecentProducts = () => {
   return useQuery({
     queryKey: dashboardKeys.recent(),
     queryFn: async () => {
-      const data  = await dashboardApi.getRecentProducts();
+      const data = await dashboardApi.getRecentProducts();
       return data;
     },
     staleTime: 5 * 60 * 1000,
+    gcTime: 0,
   });
 };
 
@@ -36,21 +38,22 @@ export const useDashboardExpiringProducts = () => {
   return useQuery({
     queryKey: dashboardKeys.expiring(),
     queryFn: async () => {
-      const data  = await dashboardApi.getExpiringProducts();
+      const data = await dashboardApi.getExpiringProducts();
       return data;
     },
     staleTime: 5 * 60 * 1000,
+    gcTime: 0,
   });
 };
 
 export const useDashboardOverview = () => {
-  
   return useQuery({
     queryKey: dashboardKeys.overview(),
     queryFn: async () => {
-      const data  = await dashboardApi.getOverview();
+      const data = await dashboardApi.getOverview();
       return data;
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
   });
 };

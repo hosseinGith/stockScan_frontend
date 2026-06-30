@@ -14,7 +14,7 @@ export const useGetProductFromBarcode = (barcode: string) => {
 };
 export const productKeys = {
   all: ["products"] as const,
-  lists: () => [...productKeys.all, "list"] as const,
+  lists: () => [...productKeys.all, "list"] as const  ,
   list: (filters: unknown) => [...productKeys.lists(), filters] as const,
   details: () => [...productKeys.all, "detail"] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
@@ -58,14 +58,7 @@ export const useCreateProduct = () => {
         showToast({ message: "کالا با موفقیت ایجاد شد", type: "success" }),
       );
     },
-    onError: (error: unknown) => {
-      dispatch(
-        showToast({
-          message: error?.response?.data?.message || "خطا در ایجاد کالا",
-          type: "error",
-        }),
-      );
-    },
+    onError: (error: unknown) => {},
   });
 };
 
@@ -99,14 +92,7 @@ export const useDeleteProduct = () => {
         showToast({ message: "کالا با موفقیت حذف شد", type: "success" }),
       );
     },
-    onError: (error: unknown) => {
-      dispatch(
-        showToast({
-          message: error.response?.data?.message || "خطا در حذف کالا",
-          type: "error",
-        }),
-      );
-    },
+    onError: (error: unknown) => {},
   });
 };
 
@@ -129,20 +115,7 @@ export const useUpdateProductQuantity = () => {
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
       });
-      dispatch(
-        showToast({
-          message: `موجودی با موفقیت ${variables.action === "add" ? "افزایش" : "کاهش"} یافت`,
-          type: "success",
-        }),
-      );
     },
-    onError: (error: unknown) => {
-      dispatch(
-        showToast({
-          message: error.response?.data?.message || "خطا در تغییر موجودی",
-          type: "error",
-        }),
-      );
-    },
+    onError: (error: unknown) => {},
   });
 };

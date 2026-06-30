@@ -18,8 +18,8 @@ export const useCategories = () => {
       const { data } = await categoriesApi.getAll();
       return data.data;
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 5 * 1000,
     retry: 2,
     refetchOnWindowFocus: false,
   });
@@ -33,7 +33,7 @@ export const useCategory = (id: string) => {
       return data.data;
     },
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 1000,
   });
 };
 
