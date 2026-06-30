@@ -5,7 +5,7 @@ import { showToast } from "../../shared/stores/slices/uiSlice";
 import { toast } from "sonner";
 import {
   useCreateProduct,
-  useGetProductInfoFromBarcode,
+  useGetProductFromBarcode,
 } from "../../shared/hooks/queries/useProducts";
 import ScannerSection from "./components/ScannerSection";
 import ProductFormSection from "./components/ProductFormSection";
@@ -37,7 +37,7 @@ const ScanProduct: React.FC = () => {
   });
 
   const productCreateHook = useCreateProduct();
-  const getProductInfoFromBarcode = useGetProductInfoFromBarcode();
+  
 
   // ============================================
   // توابع
@@ -55,7 +55,8 @@ const ScanProduct: React.FC = () => {
 
   const handleGetProductInfo = async (barcode: string) => {
     try {
-      const data = await getProductInfoFromBarcode.mutateAsync(barcode);
+      const data =  useGetProductFromBarcode(barcode);
+      
       if (data?.data) {
         setFormData((prev) => ({
           ...prev,
