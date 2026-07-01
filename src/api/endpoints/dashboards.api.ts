@@ -2,12 +2,11 @@ import type { ApiResponse, Product } from "../../shared/types/product";
 import { apiClient } from "../client";
 
 export interface DashboardStats {
-  totalProducts: number;
-  totalValue: number;
-  expiredCount: number;
-  expiringSoonCount: number;
-  lowStockCount: number;
+  productsCount: number;
+  totalPrice: number;
+  expiredProductsCount: number;
   categoriesCount: number;
+  expiringSoonProductsCount: number;
 }
 
 export interface DashboardOverview {
@@ -26,6 +25,5 @@ export const dashboardApi = {
     apiClient.get<ApiResponse<Product[]>>("/dashboard/expiring-products"),
   getLowStock: () =>
     apiClient.get<ApiResponse<Product[]>>("/dashboard/low-stock"),
-  getOverview: () =>
-    apiClient.get<ApiResponse<DashboardOverview>>("/dashboard/overview"),
+  getOverview: () => apiClient.get<DashboardOverview>("/dashboard/overview"),
 };

@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
-import {
-  selectAllProducts,
-  selectProductsCount,
-  selectTotalValue,
-} from "../../shared/stores/slices/productSlice";
-import { selectTheme } from "../../shared/stores/slices/uiSlice";
 import {
   isExpired,
   isExpiringSoon,
   formatPrice,
   formatDateToPersian,
 } from "../../shared/utils/helpers";
-import BottomNav from "../../shared/components/BottomNav";
 import Header from "../../shared/components/Header";
 import StatsCard from "./components/StatsCard";
 import { useNavigate } from "react-router-dom";
@@ -22,10 +14,10 @@ import { motion } from "framer-motion";
 const Dashboard: React.FC = () => {
   const { data, isLoading, error } = useDashboardOverview();
   const dashboardData = data?.data;
+  const products = dashboardData?.recentProducts;
   const navigate = useNavigate();
-  const products = useAppSelector(selectAllProducts);
-  const totalProducts = useAppSelector(selectProductsCount);
-  const totalValue = useAppSelector(selectTotalValue);
+  const totalProducts = dashboardData?.stats.productsCount;
+  const totalPrice = dashboardData?.stats.totalPrice;
 
   const [date, setDate] = useState("");
 
@@ -45,7 +37,7 @@ const Dashboard: React.FC = () => {
     return <div className="text-center py-10">در حال بارگذاری...</div>;
   }
 
-  if (error || !dashboardData) {
+  if (error || !dashboardData || !data) {
     return (
       <div className="text-center text-red-500 py-10">
         خطا در بارگذاری داشبورد
@@ -54,11 +46,10 @@ const Dashboard: React.FC = () => {
   }
 
   // محاسبات با استفاده از products
-  const expiringCount = products.filter(
+  const expiringCount = products?.filter(
     (p) => !isExpired(p.expiryDate) && isExpiringSoon(p.expiryDate),
   ).length;
-  const expiredCount = products.filter((p) => isExpired(p.expiryDate)).length;
-
+  const expiredCount = products?.filter((p) => isExpired(p.expiryDate)).length;
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-24 min-h-screen bg-(--color-bg-body)">
       <Header
@@ -66,7 +57,7 @@ const Dashboard: React.FC = () => {
         rightAction={
           <button className="relative">
             <i className="fas fa-bell text-secondary text-xl"></i>
-            {expiringCount > 0 && (
+            {Number(expiringCount)  && (
               <span className="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                 {expiringCount}
               </span>
@@ -99,28 +90,28 @@ const Dashboard: React.FC = () => {
         <StatsCard
           icon="fas fa-cubes"
           iconColor="text-primary"
-          value={totalProducts}
+          value={Number(totalProducts)}
           label="کل کالاها"
           bgColor="bg-primary-bg"
         />
         <StatsCard
           icon="fas fa-credit-card"
           iconColor="text-success"
-          value={totalValue}
+          value={Number(totalPrice)}
           label="ارزش کل (تومان)"
           bgColor="bg-success-bg"
         />
         <StatsCard
           icon="fas fa-hourglass-half"
           iconColor="text-warning"
-          value={expiringCount}
+          value={Number(expiringCount)}
           label="در حال انقضا"
           bgColor="bg-warning-bg"
         />
         <StatsCard
           icon="fas fa-calendar-times"
           iconColor="text-danger"
-          value={expiredCount}
+          value={Number(expiredCount)}
           label="منقضی شده"
           bgColor="bg-danger-bg"
         />
@@ -229,7 +220,6 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </motion.div>
-
     </div>
   );
 };
