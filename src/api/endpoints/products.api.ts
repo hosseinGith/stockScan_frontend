@@ -11,7 +11,7 @@ import type {
 export const productsApi = {
   // GET /products
   getAll: (params?: { search?: string; category?: string }) =>
-    apiClient.get<Product[]>("/products", { params }),
+    apiClient.get<ApiResponse<Product[]>>("/products", { params }),
 
   // GET /products/:id
   getById: (id: string) => apiClient.get<Product>(`/products/${id}`),
@@ -35,6 +35,6 @@ export const productsApi = {
       params,
     }),
   getProductByBarcode: (barcode: string) => {
-    return apiClient.get<ApiResponse<any>>(`/products/barcode/${barcode}`);
+    return apiClient.get(`/products/barcode/${barcode}`);
   },
 };
