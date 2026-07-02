@@ -54,16 +54,6 @@ const Dashboard: React.FC = () => {
     <div className="max-w-2xl mx-auto px-4 py-5 pb-24 min-h-screen bg-(--color-bg-body)">
       <Header
         title="استوک اسکن"
-        rightAction={
-          <button className="relative">
-            <i className="fas fa-bell text-secondary text-xl"></i>
-            {Number(expiringCount)  && (
-              <span className="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                {expiringCount}
-              </span>
-            )}
-          </button>
-        }
       />
 
       <p className="text-xs text-secondary mb-6">{date}</p>

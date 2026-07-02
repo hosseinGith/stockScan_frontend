@@ -1,15 +1,11 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
+import { useAppDispatch,  } from "../../shared/stores/hooks";
 import {
-  selectAllProducts,
   deleteProduct,
   updateProduct,
 } from "../../shared/stores/slices/productSlice";
 import {
-  selectSearchQuery,
-  selectSortBy,
-  selectFilterExpired,
   showToast,
 } from "../../shared/stores/slices/uiSlice";
 import {
@@ -18,7 +14,6 @@ import {
   formatDateToPersian,
   isExpiringSoon,
 } from "../../shared/utils/helpers";
-import BottomNav from "../../shared/components/BottomNav";
 import EditProductModal from "./components/EditProductModal";
 import type { Product } from "../../shared/types/product";
 import { toast } from "sonner";
@@ -40,7 +35,6 @@ interface FilterState {
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -76,10 +70,6 @@ const ProductsList: React.FC = () => {
 
   const { data: categories } = useCategories();
 
-  const products = useAppSelector(selectAllProducts);
-  const searchQuery = useAppSelector(selectSearchQuery);
-  const sortBy = useAppSelector(selectSortBy);
-  const filterExpired = useAppSelector(selectFilterExpired);
   const stats = {
     total: searchData?.data?.length || 0,
     totalValue: searchData?.stats?.totalValue || 0,
@@ -87,53 +77,9 @@ const ProductsList: React.FC = () => {
     expiringSoonCount: searchData?.stats?.expiringSoonCount || 0,
   };
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products];
 
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.barcode.includes(searchQuery),
-      );
-    }
-
-    if (filterExpired) {
-      filtered = filtered.filter((p) => isExpired(p.expiryDate));
-    }
-
-    switch (sortBy) {
-      case "name":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "price_asc":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "price_desc":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "quantity":
-        filtered.sort((a, b) => b.quantity - a.quantity);
-        break;
-      case "expiry":
-        filtered.sort((a, b) =>
-          (a.expiryDate || "9999-12-31").localeCompare(
-            b.expiryDate || "9999-12-31",
-          ),
-        );
-        break;
-      case "newest":
-        filtered.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-        break;
-    }
-
-    return filtered;
-  }, [products, searchQuery, sortBy, filterExpired]);
-
-  const displayProducts = searchData?.data || filteredAndSortedProducts;
+  const displayProducts = searchData?.data ;
+  
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -208,14 +154,11 @@ const ProductsList: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 bg-(--color-bg-body)">
       <div className="max-w-2xl mx-auto px-4 py-5">
-        {/* ========================================== */}
-        {/* هدر */}
-        {/* ========================================== */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-md flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              className="w-10 h-10  rounded-full bg-white  shadow-md flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               <i className="fas fa-arrow-right text-lg"></i>
             </button>
@@ -229,7 +172,7 @@ const ProductsList: React.FC = () => {
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                 isFilterOpen || hasActiveFilters
                   ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 shadow-md hover:shadow-lg"
+                  : "bg-white  text-gray-600 dark:text-gray-300 shadow-md hover:shadow-lg"
               }`}
             >
               <i className="fas fa-sliders-h"></i>
@@ -249,23 +192,17 @@ const ProductsList: React.FC = () => {
           </div>
         </div>
 
-        {/* ========================================== */}
-        {/* جستجو */}
-        {/* ========================================== */}
-        <div className="relative mb-4">
-          <i className="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <div className="mb-4 flex has-focus:border-(--color-primary) bg-(--color-bg-surface) shadow transition rounded-full border-2 border-transparent  items-center">
+          <i className="fas fa-search opacity-75 px-1 text-sm"></i>
           <input
             type="text"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             placeholder="جستجو در نام یا بارکد..."
-            className="w-full pr-12 pl-4 py-3.5 bg-white dark:bg-gray-800 rounded-2xl shadow-md text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            className="w-full pr-12 pl-4  py-3.5 bg-transparent shadow-none! border-0!  transition"
           />
         </div>
 
-        {/* ========================================== */}
-        {/* پنل فیلترها */}
-        {/* ========================================== */}
         <AnimatePresence>
           {isFilterOpen && (
             <motion.div
@@ -275,9 +212,8 @@ const ProductsList: React.FC = () => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4">
+              <div className="bg-white  rounded-2xl shadow-xl p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* دسته‌بندی */}
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">
                       دسته‌بندی
@@ -298,7 +234,6 @@ const ProductsList: React.FC = () => {
                     </select>
                   </div>
 
-                  {/* وضعیت */}
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">
                       وضعیت
@@ -320,7 +255,6 @@ const ProductsList: React.FC = () => {
                     </select>
                   </div>
 
-                  {/* محدوده قیمت */}
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">
                       قیمت از
@@ -350,7 +284,6 @@ const ProductsList: React.FC = () => {
                     />
                   </div>
 
-                  {/* موجودی */}
                   <div className="flex items-center gap-3">
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -362,14 +295,13 @@ const ProductsList: React.FC = () => {
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      <span className="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="mr-3 text-sm font-medium  dark:text-gray-300">
                         فقط کالاهای موجود
                       </span>
                     </label>
                   </div>
                 </div>
 
-                {/* دکمه‌های پنل */}
                 <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
                   <button
                     onClick={() => setIsFilterOpen(false)}
@@ -389,9 +321,6 @@ const ProductsList: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* ========================================== */}
-        {/* آمار */}
-        {/* ========================================== */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg">
             <p className="text-2xl font-bold">{stats.total}</p>
@@ -409,15 +338,12 @@ const ProductsList: React.FC = () => {
           </div>
         </div>
 
-        {/* ========================================== */}
-        {/* لیست کالاها */}
-        {/* ========================================== */}
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : error ? (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-10 text-center shadow-lg">
+          <div className="bg-white  rounded-3xl p-10 text-center shadow-lg">
             <i className="fas fa-exclamation-triangle text-3xl text-red-500 mb-4"></i>
             <p className="text-gray-500 dark:text-gray-400 mb-3">
               خطا در بارگذاری
@@ -429,8 +355,8 @@ const ProductsList: React.FC = () => {
               تلاش مجدد
             </button>
           </div>
-        ) : displayProducts.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-10 text-center shadow-lg">
+        ) :!displayProducts?.length  ? (
+          <div className="bg-white  rounded-3xl p-10 text-center shadow-lg">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="fas fa-box-open text-3xl text-gray-400"></i>
             </div>
@@ -450,6 +376,7 @@ const ProductsList: React.FC = () => {
               const expired = isExpired(product.expiryDate);
               const expiringSoon = isExpiringSoon(product.expiryDate);
 
+              // eslint-disable-next-line no-useless-assignment
               let bgGradient = "";
               let badgeColor = "";
               let badgeText = "";
@@ -531,9 +458,6 @@ const ProductsList: React.FC = () => {
           </div>
         )}
 
-        {/* ========================================== */}
-        {/* وضعیت بارگذاری */}
-        {/* ========================================== */}
         {isFetching && !isLoading && (
           <div className="text-center text-sm text-gray-400 mt-4">
             <i className="fas fa-spinner fa-spin ml-1"></i>
@@ -543,9 +467,6 @@ const ProductsList: React.FC = () => {
 
         </div>
 
-      {/* ========================================== */}
-      {/* مودال ویرایش */}
-      {/* ========================================== */}
       <EditProductModal
         isOpen={isModalOpen}
         product={editingProduct}

@@ -52,13 +52,13 @@ export const useCreateProduct = () => {
 
   return useMutation({
     mutationFn: (data: CreateProductDto) => productsApi.create(data),
-    onSuccess: (response) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       dispatch(
         showToast({ message: "کالا با موفقیت ایجاد شد", type: "success" }),
       );
     },
-    onError: (error: unknown) => {},
+    onError: () => {},
   });
 };
 
@@ -68,7 +68,7 @@ export const useUpdateProduct = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateProductDto }) =>
       productsApi.update(id, data),
-    onSuccess: (response, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
@@ -92,13 +92,12 @@ export const useDeleteProduct = () => {
         showToast({ message: "کالا با موفقیت حذف شد", type: "success" }),
       );
     },
-    onError: (error: unknown) => {},
+    onError: () => {},
   });
 };
 
 export const useUpdateProductQuantity = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
 
   return useMutation({
     mutationFn: ({
@@ -110,12 +109,12 @@ export const useUpdateProductQuantity = () => {
       quantity: number;
       action: "add" | "subtract";
     }) => productsApi.updateQuantity(id, quantity, action),
-    onSuccess: (response, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
       });
     },
-    onError: (error: unknown) => {},
+    onError: () => {},
   });
 };
