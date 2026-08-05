@@ -1,20 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "../../../api/endpoints/products.api";
 import type { CreateProductDto, UpdateProductDto } from "../../types/product";
-import { showToast } from "../../stores/slices/uiSlice";
-import { useAppDispatch } from "../../stores/hooks";
 import { toast } from "sonner";
 
-export const useGetProductFromBarcode = (barcode: string) => {
-  return useQuery({
-    queryKey: ["product", "barcode", barcode],
-    queryFn: () => productsApi.getProductByBarcode(barcode).then((r) => r.data),
-    enabled: !!barcode,
+export const useGetProductFromBarcode = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (barcode: string) => productsApi.getProductByBarcode(barcode),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["product", "barcode", data.data],
+      });
+    },
   });
 };
 export const productKeys = {
   all: ["products"] as const,
-  lists: () => [...productKeys.all, "list"] as const  ,
+  lists: () => [...productKeys.all, "list"] as const,
   list: (filters: unknown) => [...productKeys.lists(), filters] as const,
   details: () => [...productKeys.all, "detail"] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
@@ -42,23 +45,18 @@ export const useProduct = (id: string) => {
       return data;
     },
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 };
 
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
 
   return useMutation({
     mutationFn: (data: CreateProductDto) => productsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      dispatch(
-        showToast({ message: "کالا با موفقیت ایجاد شد", type: "success" }),
-      );
     },
-    onError: () => {},
   });
 };
 
@@ -82,17 +80,12 @@ export const useUpdateProduct = () => {
 
 export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
 
   return useMutation({
     mutationFn: (id: string) => productsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      dispatch(
-        showToast({ message: "کالا با موفقیت حذف شد", type: "success" }),
-      );
     },
-    onError: () => {},
   });
 };
 
@@ -115,6 +108,5 @@ export const useUpdateProductQuantity = () => {
         queryKey: productKeys.detail(variables.id),
       });
     },
-    onError: () => {},
   });
 };

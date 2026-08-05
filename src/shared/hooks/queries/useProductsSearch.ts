@@ -39,10 +39,9 @@ export const useProductSearch = (filters?: ProductFilters) => {
     queryKey: searchKeys.results(finalFilters),
     queryFn: async () => {
       const { data } = await productsApi.search(finalFilters);
-      return data.data;
+      return data;
     },
-    staleTime: 5 * 1000,
-    gcTime: 0,
+    staleTime: 0,
     enabled: true,
     placeholderData: (previousData) => previousData,
   });

@@ -19,7 +19,6 @@ export const useCategories = () => {
       return data.data;
     },
     staleTime: 0,
-    gcTime: 5 * 1000,
     retry: 2,
     refetchOnWindowFocus: false,
   });
@@ -33,7 +32,7 @@ export const useCategory = (id: string) => {
       return data.data;
     },
     enabled: !!id,
-    staleTime: 5 * 1000,
+    staleTime: 0,
   });
 };
 
