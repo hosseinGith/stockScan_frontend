@@ -1,6 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import ShamsiDatePicker from '../../../shared/components/ShamsiDatePicker';
+import React from "react";
+import { motion } from "framer-motion";
+import { PersianDatePicker } from "persian-date-kit";
+import { DatePicker } from "@moamfar/react-time-date-picker";
+import "@moamfar/react-time-date-picker/dist/style.css";
 
 interface ProductFormData {
   barcode: string;
@@ -15,8 +17,8 @@ interface ProductFormData {
 
 interface ProductFormSectionProps {
   barcode: string;
-  formData: Omit<ProductFormData, 'barcode'>;
-  onFormChange: (data: Partial<Omit<ProductFormData, 'barcode'>>) => void;
+  formData: Omit<ProductFormData, "barcode">;
+  onFormChange: (data: Partial<Omit<ProductFormData, "barcode">>) => void;
   onSave: () => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -51,7 +53,6 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
       </div>
 
       <div className="space-y-4">
-        {/* بارکد */}
         <div>
           <label className="block text-xs text-gray-500 mb-1">بارکد</label>
           <div className="bg-gray-100 dark:bg-gray-900 rounded-xl px-4 py-3">
@@ -59,7 +60,6 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
           </div>
         </div>
 
-        {/* نام کالا */}
         <div>
           <label className="block text-xs text-gray-500 mb-1">
             نام کالا <span className="text-red-500">*</span>
@@ -74,7 +74,6 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
           />
         </div>
 
-        {/* قیمت و تعداد */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">
@@ -82,24 +81,27 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
             </label>
             <input
               type="number"
-              value={formData.price || ''}
+              value={formData.price || ""}
               onChange={(e) => onFormChange({ price: Number(e.target.value) })}
               placeholder="0"
               className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">تعداد/موجودی</label>
+            <label className="block text-xs text-gray-500 mb-1">
+              تعداد/موجودی
+            </label>
             <input
               type="number"
               value={formData.quantity}
-              onChange={(e) => onFormChange({ quantity: Number(e.target.value) })}
+              onChange={(e) =>
+                onFormChange({ quantity: Number(e.target.value) })
+              }
               className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
             />
           </div>
         </div>
 
-        {/* دسته‌بندی و حداقل موجودی */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">
@@ -113,31 +115,41 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">حداقل موجودی</label>
+            <label className="block text-xs text-gray-500 mb-1">
+              حداقل موجودی
+            </label>
             <input
               type="number"
               value={formData.minQuantity}
-              onChange={(e) => onFormChange({ minQuantity: Number(e.target.value) })}
+              onChange={(e) =>
+                onFormChange({ minQuantity: Number(e.target.value) })
+              }
               placeholder="1"
               className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
             />
           </div>
         </div>
 
-        {/* تاریخ انقضا */}
         <div>
           <label className="block text-xs text-gray-500 mb-1">
             تاریخ انقضا <span className="text-red-500">*</span>
           </label>
-          <ShamsiDatePicker
-            onChange={(val) => onFormChange({ expiryDate: val || new Date() })}
+          <DatePicker
+            type="jalaali"
+            onChange={(val) =>
+              onFormChange({
+                expiryDate:
+                  (typeof val === "object" ? val[0] : val) || new Date(),
+              })
+            }
             value={formData.expiryDate || new Date()}
           />
         </div>
 
-        {/* توضیحات */}
         <div>
-          <label className="block text-xs text-gray-500 mb-1">توضیحات (اختیاری)</label>
+          <label className="block text-xs text-gray-500 mb-1">
+            توضیحات (اختیاری)
+          </label>
           <textarea
             value={formData.description}
             onChange={(e) => onFormChange({ description: e.target.value })}
@@ -147,7 +159,6 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
           />
         </div>
 
-        {/* دکمه‌ها */}
         <div className="flex gap-3 pt-3">
           <button
             onClick={onSave}

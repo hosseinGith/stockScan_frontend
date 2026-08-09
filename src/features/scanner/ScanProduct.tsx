@@ -16,15 +16,13 @@ const ScanProduct: React.FC = () => {
   const dispatch = useAppDispatch();
   const products = useAppSelector((state) => state.products.items);
 
-  // ============================================
-  // State
-  // ============================================
   const [activeTab, setActiveTab] = useState<"scan" | "manual">("scan");
   const [scannedBarcode, setScannedBarcode] = useState<string>("");
   const [manualBarcode, setManualBarcode] = useState<string>("");
   const [isScanning, setIsScanning] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const barcodeCheckMutation = useGetProductFromBarcode();
 
   const [formData, setFormData] = useState<Omit<ProductFormData, "barcode">>({
     name: "",
@@ -37,11 +35,6 @@ const ScanProduct: React.FC = () => {
   });
 
   const productCreateHook = useCreateProduct();
-  
-
-  // ============================================
-  // توابع
-  // ============================================
 
   const handleScanSuccess = (data: string) => {
     console.log("✅ بارکد اسکن شد:", data);
@@ -55,9 +48,8 @@ const ScanProduct: React.FC = () => {
 
   const handleGetProductInfo = async (barcode: string) => {
     try {
-      const data =  useGetProductFromBarcode(barcode);
-      
-      if (data?.data) {
+      const data = await barcodeCheckMutation.mutateAsync(barcode);
+      if (data.data) {
         setFormData((prev) => ({
           ...prev,
           category: data.data.brand || "",
@@ -66,6 +58,12 @@ const ScanProduct: React.FC = () => {
         }));
       }
     } catch (e) {
+      setFormData((prev) => ({
+        ...prev,
+        category: "",
+        description: "",
+        name: "",
+      }));
       console.error("خطا در دریافت اطلاعات کالا:", e);
     }
   };
@@ -86,7 +84,9 @@ const ScanProduct: React.FC = () => {
     handleGetProductInfo(barcode);
   };
 
-  const handleFormChange = (data: Partial<Omit<ProductFormData, "barcode">>) => {
+  const handleFormChange = (
+    data: Partial<Omit<ProductFormData, "barcode">>,
+  ) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
@@ -160,29 +160,20 @@ const ScanProduct: React.FC = () => {
     resetForm();
   };
 
-  // ============================================
-  // مدیریت تغییر تب
-  // ============================================
   useEffect(() => {
-    if (activeTab === "scan") {
-      setIsScanning(true);
-      setShowForm(false);
-    } else {
-      setIsScanning(false);
-    }
+    (() => {
+      if (activeTab === "scan") {
+        setIsScanning(true);
+        setShowForm(false);
+      } else {
+        setIsScanning(false);
+      }
+    })();
   }, [activeTab]);
-
-  // ============================================
-  // رندر
-  // ============================================
 
   return (
     <div className="min-h-screen mb-18 bg-bg-body">
       <div className="max-w-2xl mx-auto px-4 py-5">
-        
-        {/* ========================================== */}
-        {/* هدر */}
-        {/* ========================================== */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button
@@ -200,9 +191,6 @@ const ScanProduct: React.FC = () => {
           </span>
         </div>
 
-        {/* ========================================== */}
-        {/* تب‌ها */}
-        {/* ========================================== */}
         <div className="flex gap-2 mb-6 bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-md">
           <button
             onClick={() => {
@@ -213,7 +201,7 @@ const ScanProduct: React.FC = () => {
             }}
             className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
               activeTab === "scan"
-                ? "bg-gradient-to-r bg-(--color-primary) text-white shadow-lg"
+                ? "bg-linear-to-r bg-(--color-primary) text-white shadow-lg"
                 : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
@@ -227,7 +215,7 @@ const ScanProduct: React.FC = () => {
             }}
             className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
               activeTab === "manual"
-                ? "bg-gradient-to-r bg-(--color-primary) text-white shadow-lg"
+                ? "bg-linear-to-r bg-(--color-primary) text-white shadow-lg"
                 : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
@@ -235,9 +223,6 @@ const ScanProduct: React.FC = () => {
           </button>
         </div>
 
-        {/* ========================================== */}
-        {/* بخش اسکنر */}
-        {/* ========================================== */}
         {activeTab === "scan" && !showForm && (
           <ScannerSection
             isActive={isScanning}
@@ -245,9 +230,6 @@ const ScanProduct: React.FC = () => {
           />
         )}
 
-        {/* ========================================== */}
-        {/* بخش ورود دستی */}
-        {/* ========================================== */}
         {activeTab === "manual" && !showForm && (
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
             <div className="text-center mb-6">
@@ -260,7 +242,9 @@ const ScanProduct: React.FC = () => {
             <input
               type="text"
               value={manualBarcode}
-              onChange={(e) => setManualBarcode(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) =>
+                setManualBarcode(e.target.value.replace(/\D/g, ""))
+              }
               placeholder="مثال: 6260010001234"
               className="w-full px-4 py-3.5 rounded-xl text-center font-mono text-sm focus:outline-none focus:ring-2"
               maxLength={13}
@@ -287,9 +271,6 @@ const ScanProduct: React.FC = () => {
           </div>
         )}
 
-        {/* ========================================== */}
-        {/* بخش فرم محصول */}
-        {/* ========================================== */}
         {showForm && (
           <ProductFormSection
             barcode={scannedBarcode}

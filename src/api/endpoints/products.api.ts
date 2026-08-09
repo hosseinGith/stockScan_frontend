@@ -31,7 +31,7 @@ export const productsApi = {
   updateQuantity: (id: string, quantity: number, action: "add" | "subtract") =>
     apiClient.patch<Product>(`/products/${id}/quantity`, { quantity, action }),
   search: (params: ProductFilters) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Product>>>("/products/search", {
+    apiClient.get<PaginatedResponse<Product>>("/products/search", {
       params,
     }),
   getProductByBarcode: (barcode: string) => {

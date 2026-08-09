@@ -14,7 +14,6 @@ import { motion } from "framer-motion";
 const Dashboard: React.FC = () => {
   const { data, isLoading, error } = useDashboardOverview();
   const dashboardData = data?.data;
-  const products = dashboardData?.recentProducts;
   const navigate = useNavigate();
   const totalProducts = dashboardData?.stats.productsCount;
   const totalPrice = dashboardData?.stats.totalPrice;
@@ -46,10 +45,8 @@ const Dashboard: React.FC = () => {
   }
 
   // محاسبات با استفاده از products
-  const expiringCount = products?.filter(
-    (p) => !isExpired(p.expiryDate) && isExpiringSoon(p.expiryDate),
-  ).length;
-  const expiredCount = products?.filter((p) => isExpired(p.expiryDate)).length;
+  const expiringCount = data.data.stats.expiringSoonProductsCount
+  const expiredCount = data.data.stats.expiredProductsCount
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-24 min-h-screen bg-(--color-bg-body)">
       <Header

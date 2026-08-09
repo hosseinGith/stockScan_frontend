@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAppDispatch,  } from "../../shared/stores/hooks";
-import {
-  deleteProduct,
-  updateProduct,
-} from "../../shared/stores/slices/productSlice";
-import {
-  showToast,
-} from "../../shared/stores/slices/uiSlice";
 import {
   isExpired,
   formatPrice,
@@ -17,28 +9,23 @@ import {
 import EditProductModal from "./components/EditProductModal";
 import type { Product } from "../../shared/types/product";
 import { toast } from "sonner";
-import { useCategories } from "../../shared/hooks/queries/useCategories";
 import { useProductSearch } from "../../shared/hooks/queries/useProductsSearch";
 import { useDebounce } from "use-debounce";
-import { motion, AnimatePresence } from "framer-motion";
-
-interface FilterState {
-  search: string;
-  category: string;
-  minPrice: string;
-  maxPrice: string;
-  sortBy: "name" | "price_asc" | "price_desc" | "newest";
-  status: "all" | "available" | "expired" | "expiring_soon";
-  inStock: boolean;
-}
+import {
+  useDeleteProduct,
+  useUpdateProduct,
+} from "../../shared/hooks/queries/useProducts";
+import type { FilterState } from "./types";
+import SearchListOfPoructs from "./components/SearchListOfPoructs";
 
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const deleteProduct = useDeleteProduct();
+  const updateProduct = useUpdateProduct();
 
   const [filters, setFilters] = useState<FilterState>({
     search: searchParams.get("search") || "",
@@ -51,6 +38,8 @@ const ProductsList: React.FC = () => {
   });
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
+  const [debouncedMaxPrice] = useDebounce(filters.maxPrice, 500);
+  const [debouncedMinPrice] = useDebounce(filters.minPrice, 500);
 
   const {
     data: searchData,
@@ -61,33 +50,29 @@ const ProductsList: React.FC = () => {
   } = useProductSearch({
     search: debouncedSearch || undefined,
     categoryId: filters.category || undefined,
-    minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
-    maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
+    minPrice: debouncedMaxPrice ? Number(debouncedMaxPrice) : undefined,
+    maxPrice: debouncedMinPrice ? Number(debouncedMinPrice) : undefined,
     sortBy: filters.sortBy,
     status: filters.status === "all" ? undefined : filters.status,
     inStock: filters.inStock || undefined,
   });
 
-  const { data: categories } = useCategories();
-
   const stats = {
     total: searchData?.data?.length || 0,
-    totalValue: searchData?.stats?.totalValue || 0,
-    expiredCount: searchData?.stats?.expiredCount || 0,
-    expiringSoonCount: searchData?.stats?.expiringSoonCount || 0,
+    totalValue: searchData?.stats?.totalPrice || 0,
+    expiredCount: searchData?.stats?.expiredProductsCount || 0,
+    expiringSoonCount: searchData?.stats?.expiringSoonProductsCount || 0,
   };
 
-
-  const displayProducts = searchData?.data ;
-  
+  const displayProducts = searchData?.data;
 
   useEffect(() => {
     const params = new URLSearchParams();
 
     if (filters.search) params.set("search", filters.search);
     if (filters.category) params.set("category", filters.category);
-    if (filters.minPrice) params.set("minPrice", filters.minPrice);
-    if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+    if (debouncedMinPrice) params.set("minPrice", debouncedMinPrice);
+    if (debouncedMinPrice) params.set("maxPrice", debouncedMinPrice);
     if (filters.sortBy !== "name") params.set("sortBy", filters.sortBy);
     if (filters.status !== "all") params.set("status", filters.status);
     if (filters.inStock) params.set("inStock", "true");
@@ -98,8 +83,8 @@ const ProductsList: React.FC = () => {
   const hasActiveFilters =
     filters.search ||
     filters.category ||
-    filters.minPrice ||
-    filters.maxPrice ||
+    debouncedMinPrice ||
+    debouncedMinPrice ||
     filters.sortBy !== "name" ||
     filters.status !== "all" ||
     filters.inStock;
@@ -107,19 +92,6 @@ const ProductsList: React.FC = () => {
   const activeFilterCount = Object.values(filters).filter(
     (v) => v && v !== "all" && v !== "name" && v !== false,
   ).length;
-
-  const clearFilters = () => {
-    setFilters({
-      search: "",
-      category: "",
-      minPrice: "",
-      maxPrice: "",
-      sortBy: "name",
-      status: "all",
-      inStock: false,
-    });
-    setIsFilterOpen(false);
-  };
 
   const goToProduct = (id: string) => {
     navigate(`/product/${id}`);
@@ -130,18 +102,15 @@ const ProductsList: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSaveEdit = (id: string, updates: Partial<Product>) => {
-    dispatch(updateProduct({ id, updates }));
-    dispatch(
-      showToast({ message: "کالا با موفقیت ویرایش شد", type: "success" }),
-    );
+  const handleSaveEdit = async (id: string, updates: Partial<Product>) => {
+    await updateProduct.mutateAsync({ id, data: updates });
     setIsModalOpen(false);
     setEditingProduct(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("آیا از حذف این کالا مطمئن هستید؟")) {
-      dispatch(deleteProduct(id));
+      await deleteProduct.mutateAsync(id);
       toast.success("کالا حذف شد");
     }
   };
@@ -172,7 +141,7 @@ const ProductsList: React.FC = () => {
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                 isFilterOpen || hasActiveFilters
                   ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                  : "bg-white  text-gray-600 dark:text-gray-300 shadow-md hover:shadow-lg"
+                  : "bg-white  text-gray-600 shadow-md hover:shadow-lg"
               }`}
             >
               <i className="fas fa-sliders-h"></i>
@@ -199,127 +168,15 @@ const ProductsList: React.FC = () => {
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             placeholder="جستجو در نام یا بارکد..."
-            className="w-full pr-12 pl-4  py-3.5 bg-transparent shadow-none! border-0!  transition"
+            className="w-full pr-12 pl-4  py-3.5 bg-transparent shadow-none! border-0!  transition text-(--color-text-primary)"
           />
         </div>
-
-        <AnimatePresence>
-          {isFilterOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden mb-4"
-            >
-              <div className="bg-white  rounded-2xl shadow-xl p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      دسته‌بندی
-                    </label>
-                    <select
-                      value={filters.category}
-                      onChange={(e) =>
-                        setFilters({ ...filters, category: e.target.value })
-                      }
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <option value="">همه دسته‌ها</option>
-                      {categories?.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      وضعیت
-                    </label>
-                    <select
-                      value={filters.status}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          status: e.target.value as FilterState["status"],
-                        })
-                      }
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <option value="all">همه</option>
-                      <option value="available">موجود</option>
-                      <option value="expiring_soon">در حال انقضا</option>
-                      <option value="expired">منقضی شده</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      قیمت از
-                    </label>
-                    <input
-                      type="number"
-                      value={filters.minPrice}
-                      onChange={(e) =>
-                        setFilters({ ...filters, minPrice: e.target.value })
-                      }
-                      placeholder="۰"
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      قیمت تا
-                    </label>
-                    <input
-                      type="number"
-                      value={filters.maxPrice}
-                      onChange={(e) =>
-                        setFilters({ ...filters, maxPrice: e.target.value })
-                      }
-                      placeholder="نامحدود"
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={filters.inStock}
-                        onChange={(e) =>
-                          setFilters({ ...filters, inStock: e.target.checked })
-                        }
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      <span className="mr-3 text-sm font-medium  dark:text-gray-300">
-                        فقط کالاهای موجود
-                      </span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                  <button
-                    onClick={() => setIsFilterOpen(false)}
-                    className="flex-1 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition"
-                  >
-                    اعمال فیلترها
-                  </button>
-                  <button
-                    onClick={clearFilters}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-300 transition"
-                  >
-                    پاک کردن همه
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <SearchListOfPoructs
+          filters={filters}
+          isFilterOpen={isFilterOpen}
+          setFilters={setFilters}
+          setIsFilterOpen={setIsFilterOpen}
+        />
 
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg">
@@ -355,7 +212,7 @@ const ProductsList: React.FC = () => {
               تلاش مجدد
             </button>
           </div>
-        ) :!displayProducts?.length  ? (
+        ) : !displayProducts?.length ? (
           <div className="bg-white  rounded-3xl p-10 text-center shadow-lg">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="fas fa-box-open text-3xl text-gray-400"></i>
@@ -464,8 +321,7 @@ const ProductsList: React.FC = () => {
             در حال بروزرسانی...
           </div>
         )}
-
-        </div>
+      </div>
 
       <EditProductModal
         isOpen={isModalOpen}

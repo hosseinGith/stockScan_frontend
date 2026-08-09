@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "../../../api/endpoints/products.api";
 import type { CreateProductDto, UpdateProductDto } from "../../types/product";
-import { toast } from "sonner";
 
 export const useGetProductFromBarcode = () => {
   const queryClient = useQueryClient();
@@ -71,9 +70,6 @@ export const useUpdateProduct = () => {
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
       });
-    },
-    onError: () => {
-      toast.error("مشکل در ذخیره کردن محصول.");
     },
   });
 };

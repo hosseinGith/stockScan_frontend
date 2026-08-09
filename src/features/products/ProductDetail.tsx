@@ -1,18 +1,15 @@
+/* eslint-disable no-useless-assignment */
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  updateProduct,
-  deleteProduct,
-} from "../../shared/stores/slices/productSlice";
 import {
   formatPrice,
   formatDateToPersian,
   isExpired,
   isExpiringSoon,
 } from "../../shared/utils/helpers";
-import BottomNav from "../../shared/components/BottomNav";
 import { toast } from "sonner";
 import {
+  useDeleteProduct,
   useProduct,
   useUpdateProduct,
 } from "../../shared/hooks/queries/useProducts";
@@ -29,7 +26,7 @@ const ProductDetail: React.FC = () => {
   const [editPrice, setEditPrice] = useState(0);
   const [editQuantity, setEditQuantity] = useState(1);
   const [editExpiry, setEditExpiry] = useState("");
-
+  const deleteProduct = useDeleteProduct();
   useEffect(() => {
     (() => {
       if (product) {
@@ -108,9 +105,9 @@ const ProductDetail: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm("آیا از حذف این کالا مطمئن هستید؟")) {
-      dispatch(deleteProduct(product.id));
+      const response = await deleteProduct.mutateAsync(product.id);
       toast.success("کالا حذف شد");
       navigate("/products");
     }
@@ -349,8 +346,7 @@ const ProductDetail: React.FC = () => {
             </div>
           </div>
         </div>
-
-        </div>
+      </div>
     </div>
   );
 };

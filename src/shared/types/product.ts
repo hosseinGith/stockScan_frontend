@@ -83,9 +83,11 @@ export interface ApiResponse<T> {
   timestamp: string;
 }
 export interface Stats {
-  expiredCount: number;
-  expiringSoonCount: number;
-  totalValue: number;
+  expiringSoonProductsCount: number;
+  productsByBarcodeCount: number;
+  expiredProductsCount: number;
+  productsCount: number;
+  totalPrice: number;
 }
 
 export interface PaginatedResponse<T> {

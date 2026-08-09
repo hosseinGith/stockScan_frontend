@@ -2,9 +2,8 @@ export const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 export const isExpired = (expiryDateStr: string | null): boolean => {
-  console.log(expiryDateStr);
   if (!expiryDateStr) return false;
-  
+
   return new Date(expiryDateStr) < today;
 };
 
@@ -17,8 +16,8 @@ export const isExpiringSoon = (expiryDateStr: string | null): boolean => {
   return diffDays <= 7 && diffDays >= 0;
 };
 
-export const formatPrice = (price: number): string => {
-  return price.toLocaleString("fa-IR") + " تومان";
+export const formatPrice = (price: number | string): string => {
+  return Number(price).toLocaleString("fa-IR") + " تومان";
 };
 
 export const formatDateToPersian = (dateStr: string | null): string => {
@@ -29,3 +28,18 @@ export const formatDateToPersian = (dateStr: string | null): string => {
 export const generateId = (): string => {
   return Date.now().toString();
 };
+export function faToEnNumbers(str: string): string {
+  const map: Record<string, string> = {
+    "۰": "0",
+    "۱": "1",
+    "۲": "2",
+    "۳": "3",
+    "۴": "4",
+    "۵": "5",
+    "۶": "6",
+    "۷": "7",
+    "۸": "8",
+    "۹": "9",
+  };
+  return str.replace(/[۰-۹]/g, (m) => map[m]);
+}

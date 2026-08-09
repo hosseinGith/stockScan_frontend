@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
 });
 function App() {
   useLayoutEffect(() => {
-    if (Number(localStorage.getItem("theme")))
+    if (localStorage.getItem("anbarak_theme") === "dark")
       document.documentElement.classList.add("dark");
   }, []);
   return (

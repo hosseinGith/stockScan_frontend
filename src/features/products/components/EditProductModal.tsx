@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import type { Product } from "../../../shared/types/index";
+import type { Product } from "../../../shared/types/product";
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -43,6 +43,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
       alert("لطفاً قیمت معتبر وارد کنید");
       return;
     }
+    
     onSave(product.id, {
       name,
       price,
