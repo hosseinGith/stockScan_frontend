@@ -5,13 +5,13 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { lazy, Suspense, useLayoutEffect } from "react";
 import { store } from "./shared/stores";
-import Dashboard from "./features/dashboard/Dashboard";
-import ProductsList from "./features/products/ProductsList";
-import ScanProduct from "./features/scanner/ScanProduct";
-import ProductDetail from "./features/products/ProductDetail";
-import Settings from "./features/settings/Settings";
-import Auth from "./features/auth";
 import BottomNav from "./shared/components/BottomNav";
+const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
+const ProductsList = lazy(() => import("./features/products/ProductsList"));
+const ScanProduct = lazy(() => import("./features/scanner/ScanProduct"));
+const ProductDetail = lazy(() => import("./features/products/ProductDetail"));
+const Settings = lazy(() => import("./features/settings/Settings"));
+const Auth = lazy(() => import("./features/auth"));
 
 const Loading = lazy(() => import("./components/common/Loading"));
 

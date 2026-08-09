@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
 import { showToast } from "../../shared/stores/slices/uiSlice";
@@ -7,9 +7,11 @@ import {
   useCreateProduct,
   useGetProductFromBarcode,
 } from "../../shared/hooks/queries/useProducts";
-import BarcodeScanner from "./components/BarcodeScanner";
-import ProductFormSection from "./components/ProductFormSection";
 import type { ProductFormData } from "./types/index";
+const BarcodeScanner = lazy(() => import("./components/BarcodeScanner"));
+const ProductFormSection = lazy(
+  () => import("./components/ProductFormSection"),
+);
 
 const ScanProduct: React.FC = () => {
   const navigate = useNavigate();
