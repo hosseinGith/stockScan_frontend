@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { PersianDatePicker } from "persian-date-kit";
 import { DatePicker } from "@moamfar/react-time-date-picker";
 import "@moamfar/react-time-date-picker/dist/style.css";
+import moment from "moment-jalaali";
+import WindowBase from "../../../components/common/Window/WindowBase";
 
 interface ProductFormData {
   barcode: string;
@@ -32,6 +33,8 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
   onCancel,
   isLoading = false,
 }) => {
+  const [year, month, day] = moment().format("jYYYY/jMM/jDD").split("/");
+  const [isOpenDateExpireCont, setIsOpenDateExpireCont] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -130,21 +133,62 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">
+        <div
+          onClick={() => setIsOpenDateExpireCont(true)}
+          className="flex gap-4 items-center w-max px-4 rounded-2xl py-2 hover:opacity-70 cursor-pointer bg-primary text-primary-bg"
+        >
+          <label className=" mb-1">
             تاریخ انقضا <span className="text-red-500">*</span>
           </label>
-          <DatePicker
-            type="jalaali"
-            onChange={(val) =>
-              onFormChange({
-                expiryDate:
-                  (typeof val === "object" ? val[0] : val) || new Date(),
-              })
-            }
-            value={formData.expiryDate || new Date()}
-          />
+          <span>{moment(formData.expiryDate).format("jYYYY/jMM/jDD")}</span>
         </div>
+        <WindowBase
+          active={isOpenDateExpireCont}
+          className="items-center flex justify-center"
+        >
+          <div className="bg-bg-body w-full flex gap-4 py-2 flex-col">
+            <DatePicker
+              type="jalaali"
+              submitTitle="ثبت"
+              buttonClassName="bg-primary w-[90%] mx-auto "
+              maxYear={Number(year) + 10}
+              setSelectedDate={(val) => {
+                let expiryDate: Date;
+                if (
+                  val &&
+                  typeof val === "object" &&
+                  "year" in val &&
+                  "month" in val &&
+                  "day" in val
+                ) {
+                  const { year, month, day } = val;
+                  const m = moment(`${year}/${month}/${day}`, "jYYYY/jMM/jDD");
+                  expiryDate = m.isValid() ? m.toDate() : new Date();
+                  console.log(expiryDate);
+                } else {
+                  expiryDate = new Date();
+                }
+                onFormChange({ expiryDate });
+                setIsOpenDateExpireCont(false);
+              }}
+              selectedDate={(() => {
+                const expiryDate = moment(formData.expiryDate)
+                  .format("jYYYY/jMM/jDD")
+                  .split("/");
+
+                const date = formData.expiryDate
+                  ? {
+                      year: expiryDate[0],
+                      month: expiryDate[1],
+                      day: expiryDate[2],
+                    }
+                  : { day, month, year };
+
+                return date;
+              })()}
+            />
+          </div>
+        </WindowBase>
 
         <div>
           <label className="block text-xs text-gray-500 mb-1">

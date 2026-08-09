@@ -1,12 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import type { Product } from "../../../shared/types/index";
 import {
   formatPrice,
   formatDateToPersian,
   isExpired,
   isExpiringSoon,
 } from "../../../shared/utils/helpers";
+import type { Product } from "../../../shared/types/product";
 
 interface ProductCardProps {
   product: Product;
@@ -25,16 +25,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const expiringSoon = isExpiringSoon(product.expiryDate);
 
   let statusClass = "";
-  let statusBadge = "";
 
   if (expired) {
     statusClass = "border-r-4 border-danger bg-danger-bg";
-    statusBadge =
-      '<span class="bg-danger text-white text-[10px] px-2 py-0.5 rounded-full">منقضی</span>';
   } else if (expiringSoon) {
     statusClass = "border-r-4 border-warning bg-warning-bg";
-    statusBadge =
-      '<span class="bg-warning text-white text-[10px] px-2 py-0.5 rounded-full">در حال انقضا</span>';
   }
 
   return (

@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Product } from "../../types/index";
 import { generateId, isExpired, isExpiringSoon } from "../../utils/helpers";
 import type { RootState } from "..";
+import type { Product } from "../../types/product";
 
 // تایپ وضعیت محصولات
 interface ProductsState {

@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  isExpired,
-  isExpiringSoon,
-  formatPrice,
-  formatDateToPersian,
-} from "../../shared/utils/helpers";
+import { formatPrice, formatDateToPersian } from "../../shared/utils/helpers";
 import Header from "../../shared/components/Header";
 import StatsCard from "./components/StatsCard";
 import { useNavigate } from "react-router-dom";
@@ -45,13 +40,11 @@ const Dashboard: React.FC = () => {
   }
 
   // محاسبات با استفاده از products
-  const expiringCount = data.data.stats.expiringSoonProductsCount
-  const expiredCount = data.data.stats.expiredProductsCount
+  const expiringCount = data.data.stats.expiringSoonProductsCount;
+  const expiredCount = data.data.stats.expiredProductsCount;
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-24 min-h-screen bg-(--color-bg-body)">
-      <Header
-        title="استوک اسکن"
-      />
+      <Header title="استوک اسکن" />
 
       <p className="text-xs text-secondary mb-6">{date}</p>
 
@@ -78,7 +71,7 @@ const Dashboard: React.FC = () => {
           icon="fas fa-cubes"
           iconColor="text-primary"
           value={Number(totalProducts)}
-          label="کل کالاها"
+          label="جمع کالاها"
           bgColor="bg-primary-bg"
         />
         <StatsCard
@@ -174,7 +167,7 @@ const Dashboard: React.FC = () => {
             مشاهده همه →
           </button>
         </div>
-        <div className="divide-y divide-default max-h-64 overflow-y-auto">
+        <div className="space-y-2 max-h-64 overflow-y-auto">
           {dashboardData.recentProducts.length === 0 ? (
             <div className="p-4 text-center text-secondary text-sm">
               <i className="fas fa-box-open"></i> هنوز کالایی اضافه نشده
@@ -184,7 +177,7 @@ const Dashboard: React.FC = () => {
               <div
                 key={p.id}
                 onClick={() => navigate(`/product/${p.id}`)}
-                className="p-3 hover:bg-hover cursor-pointer transition"
+                className="px-5 py-2 shadow-md   rounded-full  hover:bg-hover cursor-pointer transition"
               >
                 <div className="flex justify-between items-center">
                   <div>

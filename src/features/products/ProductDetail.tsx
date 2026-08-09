@@ -107,7 +107,7 @@ const ProductDetail: React.FC = () => {
 
   const handleDelete = async () => {
     if (confirm("آیا از حذف این کالا مطمئن هستید؟")) {
-      const response = await deleteProduct.mutateAsync(product.id);
+      await deleteProduct.mutateAsync(product.id);
       toast.success("کالا حذف شد");
       navigate("/products");
     }
@@ -152,7 +152,7 @@ const ProductDetail: React.FC = () => {
         {/* کارت اصلی */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden">
           {/* هدر کارت با بارکد */}
-          <div className="bg-gradient-to-r from-gray-800 to-gray-900 dark:from-gray-950 dark:to-gray-900 p-6 text-center">
+          <div className="bg-linear-to-r from-gray-800 to-gray-900 dark:from-gray-950 dark:to-gray-900 p-6 text-center">
             <div className="bg-white/10 rounded-2xl p-4 inline-block mx-auto">
               <i className="fas fa-barcode text-4xl text-white/70"></i>
             </div>
@@ -284,18 +284,6 @@ const ProductDetail: React.FC = () => {
                       className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">
-                    تاریخ انقضا (اختیاری)
-                  </label>
-                  <input
-                    type="date"
-                    value={editExpiry}
-                    onChange={(e) => setEditExpiry(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-gray-700 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
                 </div>
 
                 <div className="flex gap-3 pt-3">

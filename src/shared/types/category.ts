@@ -8,8 +8,8 @@ export interface Category {
   description?: string | null;
   isActive?: boolean;
   products?: Product[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateCategoryDto {

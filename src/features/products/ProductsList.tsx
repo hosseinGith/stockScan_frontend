@@ -16,7 +16,7 @@ import {
   useUpdateProduct,
 } from "../../shared/hooks/queries/useProducts";
 import type { FilterState } from "./types";
-import SearchListOfPoructs from "./components/SearchListOfPoructs";
+import SearchListOfProducts from "./components/SearchListOfProducts";
 
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
@@ -104,6 +104,8 @@ const ProductsList: React.FC = () => {
 
   const handleSaveEdit = async (id: string, updates: Partial<Product>) => {
     await updateProduct.mutateAsync({ id, data: updates });
+    toast.success("کالا ویرایش شد.");
+    await refetch();
     setIsModalOpen(false);
     setEditingProduct(null);
   };
@@ -111,6 +113,7 @@ const ProductsList: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm("آیا از حذف این کالا مطمئن هستید؟")) {
       await deleteProduct.mutateAsync(id);
+      await refetch();
       toast.success("کالا حذف شد");
     }
   };
@@ -171,7 +174,7 @@ const ProductsList: React.FC = () => {
             className="w-full pr-12 pl-4  py-3.5 bg-transparent shadow-none! border-0!  transition text-(--color-text-primary)"
           />
         </div>
-        <SearchListOfPoructs
+        <SearchListOfProducts
           filters={filters}
           isFilterOpen={isFilterOpen}
           setFilters={setFilters}

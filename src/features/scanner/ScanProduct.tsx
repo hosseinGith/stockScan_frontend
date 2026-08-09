@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
 import { showToast } from "../../shared/stores/slices/uiSlice";
@@ -7,7 +7,7 @@ import {
   useCreateProduct,
   useGetProductFromBarcode,
 } from "../../shared/hooks/queries/useProducts";
-import ScannerSection from "./components/ScannerSection";
+import BarcodeScanner from "./components/BarcodeScanner";
 import ProductFormSection from "./components/ProductFormSection";
 import type { ProductFormData } from "./types/index";
 
@@ -22,7 +22,6 @@ const ScanProduct: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const barcodeCheckMutation = useGetProductFromBarcode();
 
   const [formData, setFormData] = useState<Omit<ProductFormData, "barcode">>({
     name: "",
@@ -34,41 +33,44 @@ const ScanProduct: React.FC = () => {
     description: "",
   });
 
+  const barcodeCheckMutation = useGetProductFromBarcode();
   const productCreateHook = useCreateProduct();
 
-  const handleScanSuccess = (data: string) => {
-    console.log("✅ بارکد اسکن شد:", data);
-    setScannedBarcode(data);
-    setManualBarcode(data);
-    setShowForm(true);
-    setIsScanning(false);
-    toast.success("بارکد با موفقیت اسکن شد");
-    handleGetProductInfo(data);
-  };
+  const handleGetProductInfo = useCallback(
+    async (barcode: string) => {
+      try {
+        const data = await barcodeCheckMutation.mutateAsync(barcode);
+        if (data?.data) {
+          setFormData((prev) => ({
+            ...prev,
+            category: data.data.brand || "",
+            description: data.data.description || "",
+            name: data.data.description || "",
+          }));
+        }
+      } catch (e) {
+        console.error("خطا در دریافت اطلاعات کالا:", e);
 
-  const handleGetProductInfo = async (barcode: string) => {
-    try {
-      const data = await barcodeCheckMutation.mutateAsync(barcode);
-      if (data.data) {
-        setFormData((prev) => ({
-          ...prev,
-          category: data.data.brand || "",
-          description: data.data.description || "",
-          name: data.data.description || "",
-        }));
+        toast.warning("اطلاعات کالا از سرور دریافت نشد، لطفاً دستی وارد کنید");
       }
-    } catch (e) {
-      setFormData((prev) => ({
-        ...prev,
-        category: "",
-        description: "",
-        name: "",
-      }));
-      console.error("خطا در دریافت اطلاعات کالا:", e);
-    }
-  };
+    },
+    [barcodeCheckMutation],
+  );
 
-  const handleManualSubmit = () => {
+  const handleScanSuccess = useCallback(
+    (data: string) => {
+      console.log("✅ بارکد اسکن شد:", data);
+      setScannedBarcode(data);
+      setManualBarcode(data);
+      setShowForm(true);
+      setIsScanning(false);
+      toast.success("بارکد با موفقیت اسکن شد");
+      handleGetProductInfo(data);
+    },
+    [handleGetProductInfo],
+  );
+
+  const handleManualSubmit = useCallback(() => {
     const barcode = manualBarcode.trim();
     if (!barcode) {
       toast.error("لطفاً بارکد را وارد کنید");
@@ -82,15 +84,37 @@ const ScanProduct: React.FC = () => {
     setShowForm(true);
     setIsScanning(false);
     handleGetProductInfo(barcode);
-  };
+  }, [manualBarcode, handleGetProductInfo]);
 
-  const handleFormChange = (
-    data: Partial<Omit<ProductFormData, "barcode">>,
-  ) => {
-    setFormData((prev) => ({ ...prev, ...data }));
-  };
+  const handleFormChange = useCallback(
+    (data: Partial<Omit<ProductFormData, "barcode">>) => {
+      setFormData((prev) => ({ ...prev, ...data }));
+    },
+    [],
+  );
 
-  const handleSaveProduct = async () => {
+  const resetForm = useCallback(() => {
+    setShowForm(false);
+    setScannedBarcode("");
+    setManualBarcode("");
+    setFormData({
+      name: "",
+      price: 0,
+      quantity: 1,
+      minQuantity: 1,
+      expiryDate: new Date(),
+      category: "",
+      description: "",
+    });
+    setIsScanning(true);
+    setActiveTab("scan");
+  }, []);
+
+  const handleCancelForm = useCallback(() => {
+    resetForm();
+  }, [resetForm]);
+
+  const handleSaveProduct = useCallback(async () => {
     const barcode = scannedBarcode;
 
     if (!barcode) {
@@ -137,28 +161,14 @@ const ScanProduct: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setShowForm(false);
-    setScannedBarcode("");
-    setManualBarcode("");
-    setFormData({
-      name: "",
-      price: 0,
-      quantity: 1,
-      minQuantity: 1,
-      expiryDate: new Date(),
-      category: "",
-      description: "",
-    });
-    setIsScanning(true);
-    setActiveTab("scan");
-  };
-
-  const handleCancelForm = () => {
-    resetForm();
-  };
+  }, [
+    scannedBarcode,
+    formData,
+    products,
+    productCreateHook,
+    resetForm,
+    dispatch,
+  ]);
 
   useEffect(() => {
     (() => {
@@ -174,6 +184,7 @@ const ScanProduct: React.FC = () => {
   return (
     <div className="min-h-screen mb-18 bg-bg-body">
       <div className="max-w-2xl mx-auto px-4 py-5">
+        {/* هدر */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button
@@ -191,6 +202,7 @@ const ScanProduct: React.FC = () => {
           </span>
         </div>
 
+        {/* تب‌ها */}
         <div className="flex gap-2 mb-6 bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-md">
           <button
             onClick={() => {
@@ -223,13 +235,16 @@ const ScanProduct: React.FC = () => {
           </button>
         </div>
 
+        {/* بخش اسکنر */}
         {activeTab === "scan" && !showForm && (
-          <ScannerSection
+          <BarcodeScanner
             isActive={isScanning}
-            onScanSuccess={handleScanSuccess}
+            onDetected={handleScanSuccess}
+            height={350}
           />
         )}
 
+        {/* بخش ورود دستی */}
         {activeTab === "manual" && !showForm && (
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
             <div className="text-center mb-6">
@@ -271,6 +286,7 @@ const ScanProduct: React.FC = () => {
           </div>
         )}
 
+        {/* بخش فرم محصول */}
         {showForm && (
           <ProductFormSection
             barcode={scannedBarcode}

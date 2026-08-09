@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../shared/stores/hooks";
 import { clearAllProducts } from "../../shared/stores/slices/productSlice";
 import { toggleTheme, showToast } from "../../shared/stores/slices/uiSlice";
-import BottomNav from "../../shared/components/BottomNav";
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();

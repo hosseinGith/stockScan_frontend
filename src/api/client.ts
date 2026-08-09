@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { faToEnNumbers } from "../shared/utils/helpers";
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.API_URL || "http://localhost:3000/api",
+  baseURL: "/api",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
