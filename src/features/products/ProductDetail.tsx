@@ -19,6 +19,8 @@ const ProductDetail: React.FC = () => {
   const { mutate: updateProduct } = useUpdateProduct();
   const navigate = useNavigate();
   const { data, isLoading, error } = useProduct(id || "");
+  console.log(data);
+  
   const product = data;
 
   const [isEditing, setIsEditing] = useState(false);

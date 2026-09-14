@@ -1,5 +1,22 @@
 import type { Category } from "./category";
-
+export interface FileType {
+  id: string;
+  originalName: string;
+  fileName: string;
+  path: string;
+  mimeType: string;
+  size: number;
+  extension: string;
+  url: string;
+  folder: string;
+  description: string;
+  tags: string[];
+  viewCount: number;
+  checksum: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
+}
 export interface Product {
   id: string;
   barcode: string;
@@ -16,6 +33,7 @@ export interface Product {
   isActive?: boolean;
   createdAt: string;
   updatedAt: string;
+  image: FileType;
 }
 
 export interface CreateProductDto {

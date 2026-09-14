@@ -117,17 +117,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="text-xs text-secondary">
-              تاریخ انقضا (اختیاری)
-            </label>
-            <input
-              type="date"
-              value={expiryDate}
-              onChange={(e) => setExpiryDate(e.target.value)}
-              className="w-full border border-default bg-card text-primary p-2 rounded-xl text-sm focus:border-primary focus:outline-none"
-            />
-          </div>
 
           <div className="flex gap-2 pt-2">
             <button
