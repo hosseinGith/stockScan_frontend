@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import type { Product } from "../../../shared/types/product";
+import type { Product } from "../../../../shared/types/product";
 
 interface EditProductModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import type { FilterState } from "../types";
-import { useCategories } from "../../../shared/hooks/queries/useCategories";
+import type { FilterState } from "../../types";
+import { useCategories } from "../../../../shared/hooks/queries/useCategories";
 
 export default function SearchListOfProducts({
   isFilterOpen,

@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  isExpired,
-  formatPrice,
-  formatDateToPersian,
-  isExpiringSoon,
-} from "../../shared/utils/helpers";
-import EditProductModal from "./components/EditProductModal";
-import type { Product } from "../../shared/types/product";
 import { toast } from "sonner";
-import { useProductSearch } from "../../shared/hooks/queries/useProductsSearch";
 import { useDebounce } from "use-debounce";
+import { useProductSearch } from "../../shared/hooks/queries/useProductsSearch";
 import {
   useDeleteProduct,
   useUpdateProduct,
 } from "../../shared/hooks/queries/useProducts";
 import type { FilterState } from "./types";
-import SearchListOfProducts from "./components/SearchListOfProducts";
+import type { Product } from "../../shared/types/product";
+
+import EditProductModal from "./components/ProductList/EditProductModal";
+import SearchListOfProducts from "./components/ProductList/SearchListOfProducts";
+import ProductListCard from "./components/ProductList/ProductListCard";
 
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
@@ -92,10 +88,6 @@ const ProductsList: React.FC = () => {
   const activeFilterCount = Object.values(filters).filter(
     (v) => v && v !== "all" && v !== "name" && v !== false,
   ).length;
-
-  const goToProduct = (id: string) => {
-    navigate(`/product/${id}`);
-  };
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -232,89 +224,14 @@ const ProductsList: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {displayProducts.map((product) => {
-              const expired = isExpired(product.expiryDate);
-              const expiringSoon = isExpiringSoon(product.expiryDate);
-
-              // eslint-disable-next-line no-useless-assignment
-              let bgGradient = "";
-              let badgeColor = "";
-              let badgeText = "";
-
-              if (expired) {
-                bgGradient =
-                  "from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-r-4 border-red-500";
-                badgeColor = "bg-red-500";
-                badgeText = "منقضی شده";
-              } else if (expiringSoon) {
-                bgGradient =
-                  "from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20 border-r-4 border-amber-500";
-                badgeColor = "bg-amber-500";
-                badgeText = "در حال انقضا";
-              } else {
-                bgGradient =
-                  "from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80";
-              }
-
-              return (
-                <div
-                  key={product.id}
-                  className={`bg-linear-to-br ${bgGradient} rounded-2xl p-4 shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer`}
-                  onClick={() => goToProduct(product.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <h3 className="font-bold text-gray-800 dark:text-white text-lg">
-                          {product.name}
-                        </h3>
-                        {badgeText && (
-                          <span
-                            className={`${badgeColor} text-white text-[10px] px-2 py-0.5 rounded-full`}
-                          >
-                            {badgeText}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-400 font-mono mb-2">
-                        {product.barcode}
-                      </p>
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="text-blue-600 dark:text-blue-400 font-bold">
-                          💰 {formatPrice(product.price)}
-                        </span>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          📦 {product.quantity} عدد
-                        </span>
-                        <span className="text-gray-500 dark:text-gray-400 text-xs">
-                          📅 {formatDateToPersian(product.expiryDate)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 mr-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(product);
-                        }}
-                        className="w-9 h-9 rounded-full bg-white dark:bg-gray-700 shadow-md flex items-center justify-center text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-200"
-                      >
-                        <i className="fas fa-edit text-sm"></i>
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(product.id);
-                        }}
-                        className="w-9 h-9 rounded-full bg-white dark:bg-gray-700 shadow-md flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
-                      >
-                        <i className="fas fa-trash-alt text-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {displayProducts.map((product) => (
+              <ProductListCard
+                key={product.id}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                product={product}
+              />
+            ))}
           </div>
         )}
 
