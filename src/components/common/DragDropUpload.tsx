@@ -1,6 +1,7 @@
+import { Image } from "lucide-react";
 import { useState, useRef } from "react";
 
-function DragDropUpload() {
+function DragDropUpload({ className }: { className?: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -19,7 +20,7 @@ function DragDropUpload() {
   };
 
   return (
-    <div>
+    <div className={className}>
       <div
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
@@ -41,10 +42,10 @@ function DragDropUpload() {
           <img
             src={preview}
             alt="preview"
-            style={{ maxWidth: 250, borderRadius: 8 }}
+            className="w-full aspect-video h-full"
           />
         ) : (
-          <p>عکس رو بکش اینجا یا کلیک کن</p>
+          <Image className="w-full h-full max-h-30"/>
         )}
       </div>
 

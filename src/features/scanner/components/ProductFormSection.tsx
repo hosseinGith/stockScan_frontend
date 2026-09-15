@@ -43,6 +43,7 @@ const ProductFormSection: React.FC<ProductFormSectionProps> = ({
       className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl mt-4"
     >
       <div className="flex justify-between items-center mb-5">
+        <img src="" />
         <h2 className="text-xl font-bold text-gray-800 dark:text-white">
           <i className="fas fa-plus-circle text-green-500 ml-2"></i>
           ثبت کالا جدید

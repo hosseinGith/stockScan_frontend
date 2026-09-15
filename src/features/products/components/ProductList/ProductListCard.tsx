@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import type { Product } from "../../../../shared/types/product";
 import {
-    formatDateToPersian,
+  formatDateToPersian,
   formatPrice,
   isExpired,
   isExpiringSoon,
@@ -46,12 +46,14 @@ export const ProductListCard = ({
     <div
       key={product.id}
       className={`bg-linear-to-br ${bgGradient} rounded-2xl overflow-hidden  shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer`}
-      onClick={() => goToProduct(product.id)}
     >
       {product.imageUrl && (
         <img src={product.imageUrl} className="aspect-video w-full max-h-40" />
       )}
-      <div className="flex justify-between items-start p-4">
+      <div
+        onClick={() => goToProduct(product.id)}
+        className="flex justify-between items-start p-4"
+      >
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <h3 className="font-bold text-gray-800 dark:text-white text-lg">
