@@ -1,7 +1,13 @@
 import { Image } from "lucide-react";
 import { useState, useRef } from "react";
 
-function DragDropUpload({ className }: { className?: string }) {
+function DragDropUpload({
+  className,
+  uploadCallBack,
+}: {
+  className?: string;
+  uploadCallBack?: () => void;
+}) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -11,6 +17,7 @@ function DragDropUpload({ className }: { className?: string }) {
     if (!f || !f.type.startsWith("image/")) return;
     setFile(f);
     setPreview(URL.createObjectURL(f));
+    if (uploadCallBack) uploadCallBack();
   };
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -29,23 +36,16 @@ function DragDropUpload({ className }: { className?: string }) {
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        style={{
-          border: `2px dashed ${dragging ? "#007bff" : "#ccc"}`,
-          borderRadius: 10,
-          padding: 40,
-          textAlign: "center",
-          cursor: "pointer",
-          background: dragging ? "#f0f8ff" : "#fafafa",
-        }}
+        className="h-full rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 p-4 flex items-center justify-center"
       >
         {preview ? (
           <img
             src={preview}
             alt="preview"
-            className="w-full aspect-video h-full"
+            className="w-full aspect-video object-cover h-full "
           />
         ) : (
-          <Image className="w-full h-full max-h-30"/>
+          <Image className="w-full h-full max-h-30" />
         )}
       </div>
 
@@ -56,12 +56,6 @@ function DragDropUpload({ className }: { className?: string }) {
         hidden
         onChange={(e) => handleFile(e.target.files?.[0] || null)}
       />
-
-      {file && (
-        <button onClick={() => console.log(file)} style={{ marginTop: 10 }}>
-          آپلود {file.name}
-        </button>
-      )}
     </div>
   );
 }

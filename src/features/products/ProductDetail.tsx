@@ -13,6 +13,9 @@ import {
   useProduct,
   useUpdateProduct,
 } from "../../shared/hooks/queries/useProducts";
+import DragDropUpload from "../../components/common/DragDropUpload";
+import { Image } from "lucide-react";
+import { apiClient } from "../../api/client";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +23,7 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useProduct(id || "");
   console.log(data);
-  
+
   const product = data;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -60,7 +63,9 @@ const ProductDetail: React.FC = () => {
       </div>
     );
   }
-
+  const handleUpload = () => {
+    apiClient.post()
+  };
   const expired = isExpired(product.expiryDate);
   const expiringSoon = isExpiringSoon(product.expiryDate);
 
@@ -116,7 +121,7 @@ const ProductDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 pb-24">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 pb-24">
       <div className="max-w-2xl mx-auto px-4 py-5">
         {/* هدر */}
         <div className="flex items-center justify-between mb-6">
@@ -154,13 +159,23 @@ const ProductDetail: React.FC = () => {
         {/* کارت اصلی */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden">
           {/* هدر کارت با بارکد */}
-          <div className="bg-linear-to-r from-gray-800 to-gray-900 dark:from-gray-950 dark:to-gray-900 p-6 text-center">
-            <div className="bg-white/10 rounded-2xl p-4 inline-block mx-auto">
-              <i className="fas fa-barcode text-4xl text-white/70"></i>
-            </div>
-            <p className="text-white/60 text-xs mt-3 font-mono">
-              {product.barcode}
-            </p>
+          <div className="bg-linear-to-r  p-6 text-center h-80 w-full">
+            {isEditing && (
+              <DragDropUpload
+                className="h-full"
+                uploadCallBack={handleUpload}
+              />
+            )}
+            {!isEditing && product.imageUrl && (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            )}
+            {!isEditing && !product.imageUrl && (
+              <Image className="w-full h-full object-cover" />
+            )}
           </div>
 
           {/* محتوای کارت */}
